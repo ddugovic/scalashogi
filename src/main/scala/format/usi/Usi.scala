@@ -29,7 +29,6 @@ object Usi {
     def promotionString = if (promotion) "+" else ""
 
     def positions = List(orig, dest)
-
   }
 
   object Move {

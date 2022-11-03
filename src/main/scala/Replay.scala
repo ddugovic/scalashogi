@@ -11,6 +11,8 @@ import shogi.format.usi.Usi
 
 case class Replay(setup: Game, state: Game) {
   def apply(game: Game) = copy(state = game)
+
+  def addMoveOrDrop(moveOrDrop: MoveOrDrop) = copy(state = state(moveOrDrop))
 }
 
 object Replay {
@@ -40,15 +42,16 @@ object Replay {
       usis: Seq[Usi],
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
-  ): Validated[String, Replay] =
-    usis.foldLeft[Validated[String, Replay]](valid(Replay(makeGame(initialSfen, variant)))) {
-      case (acc, usi) =>
-        acc andThen { replay =>
-          replay.state(usi) andThen { game =>
-            valid(replay(game))
-          }
+  ): Validated[String, Replay] = {
+    val game = makeGame(initialSfen, variant)
+    usis.foldLeft[Validated[String, Replay]](valid(Replay(game))) { case (acc, usi) =>
+      acc andThen { replay =>
+        replay.state(usi) andThen { situation =>
+          valid(Replay(game, situation))
         }
+      }
     }
+  }
 
   def gamesWhileValid(
       usis: Seq[Usi],

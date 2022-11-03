@@ -22,6 +22,12 @@ case class Situation(
       case u: Usi.Drop => variant.drop(this, u)
     }
 
+  def apply(moveOrDrop: MoveOrDrop): Situation =
+    moveOrDrop match {
+      case Left(move)  => variant.applyMove(this, move)
+      case Right(drop) => variant.applyDrop(this, drop)
+    }
+
   def apply(parsedMove: ParsedMove): Validated[String, Situation] =
     parsedMove.toUsi(this) andThen (apply _)
 
@@ -71,7 +77,7 @@ case class Situation(
     dropActorsOf(color)
       .exists(_.destinations.nonEmpty)
 
-  def dropDestsOf(piece: Piece): Option[List[Pos]] = dropActorOf(piece) map (_.destinations)
+  def dropDestsOf(piece: Piece): List[Pos] = dropActorOf(piece).fold[List[Pos]](Nil)(_.destinations)
 
   // King safety
 

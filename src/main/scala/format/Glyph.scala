@@ -70,6 +70,9 @@ object Glyph {
     val byId: Map[Int, Glyph] = all.map { g =>
       g.id -> g
     }.toMap
+    val bySymbol: Map[String, Glyph] = all.map { g =>
+      g.symbol -> g
+    }.toMap
 
     def display = all
   }
@@ -99,6 +102,9 @@ object Glyph {
     val byId: Map[Int, Glyph] = all.map { g =>
       g.id -> g
     }.toMap
+    val bySymbol: Map[String, Glyph] = all.map { g =>
+      g.symbol -> g
+    }.toMap
 
     def display = all
   }
@@ -119,6 +125,9 @@ object Glyph {
     val byId: Map[Int, Glyph] = all.map { g =>
       g.id -> g
     }.toMap
+    val bySymbol: Map[String, Glyph] = all.map { g =>
+      g.symbol -> g
+    }.toMap
 
     def display = all
   }
@@ -127,4 +136,13 @@ object Glyph {
     MoveAssessment.byId.get(id) orElse
       PositionAssessment.byId.get(id) orElse
       Observation.byId.get(id)
+
+  def find(s: String): Option[Glyph] =
+    if (s.startsWith("$"))
+      s.drop(1).toIntOption flatMap Glyph.find
+    else {
+      MoveAssessment.bySymbol.get(s) orElse
+        PositionAssessment.bySymbol.get(s) orElse
+        Observation.bySymbol.get(s)
+    }
 }

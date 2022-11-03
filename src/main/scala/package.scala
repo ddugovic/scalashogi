@@ -14,4 +14,5 @@ package object shogi extends scalalib.Common with scalalib.OrnicarOption with sc
 
   type PositionHash = Array[Byte]
 
+  type MoveOrDrop = Either[Move, Drop]
 }

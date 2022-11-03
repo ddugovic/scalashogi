@@ -28,8 +28,6 @@ sealed trait ParsedMove {
 
   def withMetas(m: Metas): ParsedMove
 
-  def withSuffixes(s: Suffixes): ParsedMove = withMetas(metas withSuffixes s)
-
   def withComments(s: List[String]): ParsedMove = withMetas(metas withComments s)
 
   def withVariations(s: List[ParsedMoves]): ParsedMove = withMetas(metas withVariations s)
@@ -105,11 +103,6 @@ case class Metas(
     timeSpent: Option[Centis],
     timeTotal: Option[Centis]
 ) {
-
-  def withSuffixes(s: Suffixes) =
-    copy(
-      glyphs = s.glyphs
-    )
 
   def withGlyphs(g: Glyphs) = copy(glyphs = g)
 

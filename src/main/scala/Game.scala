@@ -32,6 +32,8 @@ case class Game(
   def apply(usi: Usi): Validated[String, Game] =
     situation(usi).map(applySituation(_))
 
+  def apply(moveOrDrop: MoveOrDrop): Game = applySituation(situation(moveOrDrop))
+
   def apply(parsedMove: ParsedMove, metrics: MoveMetrics): Validated[String, Game] =
     situation(parsedMove).map(applySituation(_, metrics))
 

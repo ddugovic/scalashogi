@@ -6,7 +6,11 @@ import org.joda.time.format.DateTimeFormat
 
 case class Tag(name: TagType, value: String) {
 
+  def toPSNString       = s"""[$name "${escapePSNValue(value)}"]"""
   override def toString = s"""$name：$value"""
+
+  private def escapePSNValue(str: String): String =
+    str.replace("\\", "\\\\").replace("\"", "\\\"")
 }
 
 sealed trait TagType {
@@ -63,13 +67,33 @@ case class Tags(value: List[Tag]) extends AnyVal {
 
   def +(tag: Tag) = Tags(value.filterNot(_.name == tag.name) :+ tag)
 
-  override def toString = value mkString "\n"
+  def sorted =
+    copy(
+      value = value.sortBy { tag =>
+        Tags.tagIndex.getOrElse(tag.name, 999)
+      }
+    )
+
+  def toPSNString       = sorted.value.map(_.toPSNString) mkString "\n"
+  override def toString = sorted.value mkString "\n"
 }
 
 object Tags {
   val empty = Tags(Nil)
 
   private val DateRegex = """(\d{4}|\?{4})\.(\d\d|\?\?)\.(\d\d|\?\?)""".r
+
+  val tagRoster = List(
+    Tag.Event,
+    Tag.Site,
+    Tag.Start,
+    Tag.End,
+    Tag.Sente,
+    Tag.Gote,
+    Tag.Result
+  )
+  val tagIndex: Map[TagType, Int] = tagRoster.zipWithIndex.toMap
+
 }
 
 object Tag {

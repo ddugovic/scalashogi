@@ -157,7 +157,7 @@ abstract class Variant private[variant] (
       _ <- Validated.cond(
         actor.destinations.exists(_ == usi.dest),
         (),
-        s"Piece on ${usi.orig} cannot move to ${usi.dest}"
+        s"Piece ${actor.piece} on ${usi.orig} cannot move to ${usi.dest}"
       )
       unpromotedCapture = sit.board(usi.dest).map(p => p.updateRole(unpromote) | p)
       hands =
@@ -174,6 +174,20 @@ abstract class Variant private[variant] (
            )) toValid s"Can't update board with ${usi.usi} in \n${sit.toSfen}"
     } yield finalizeSituation(sit, board, hands, usi)
 
+  def applyMove(sit: Situation, move: Move): Situation = {
+    val unpromotedCapture = sit.board(move.dest).map(p => p.updateRole(unpromote) | p)
+    val hands =
+      unpromotedCapture
+        .filter(c => handRoles.contains(c.role) && addCapturedPiecesToHand)
+        .fold(sit.hands)(sit.hands store _.switch)
+    val board: Board =
+      if (move.promotion)
+        sit.board.promote(move.orig, move.dest, promote).get
+      else
+        sit.board.forceMove(move.piece, move.orig, move.dest)
+    finalizeSituation(sit, board, hands, move.toUsi)
+  }
+
   def drop(sit: Situation, usi: Usi.Drop): Validated[String, Situation] =
     for {
       _ <- Validated.cond(sit.variant.supportsDrops, (), "Variant doesn't support drops")
@@ -183,6 +197,12 @@ abstract class Variant private[variant] (
       hands <- sit.hands.take(piece) toValid s"No $piece to drop on ${usi.pos}"
       board <- sit.board.place(piece, usi.pos) toValid s"Can't drop ${usi.role} on ${usi.pos}, it's occupied"
     } yield finalizeSituation(sit, board, hands, usi)
+
+  def applyDrop(sit: Situation, drop: Drop): Situation = {
+    val hands = sit.hands.take(drop.piece).get
+    val board = sit.board.forcePlace(drop.piece, drop.pos)
+    finalizeSituation(sit, board, hands, drop.toUsi)
+  }
 
   @nowarn
   def impasse(sit: Situation): Boolean = false

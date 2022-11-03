@@ -16,6 +16,15 @@ final case class MoveActor(
   def unsafeDestinations: List[Pos] =
     shortRange(piece.directDirs) ::: longRange(piece.projectionDirs)
 
+  def moves(before: Situation): List[shogi.Move] =
+    promotionMoves(before) ::: promotionMoves(before)
+  def unpromotionMoves(before: Situation): List[shogi.Move] = destinations
+    .withFilter(!situation.variant.pieceInDeadZone(piece, _))
+    .map(shogi.Move(piece, pos, _, before, false))
+  def promotionMoves(before: Situation): List[shogi.Move] = destinations
+    .withFilter(situation.variant.canPromote(piece, pos, _))
+    .map(shogi.Move(piece, pos, _, before, true))
+
   def toUsis: List[Usi.Move] = {
     val normalMoves = destinations
       .withFilter(!situation.variant.pieceInDeadZone(piece, _))

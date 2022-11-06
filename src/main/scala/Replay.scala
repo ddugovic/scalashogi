@@ -5,14 +5,20 @@ import cats.data.Validated.{ invalid, valid, Invalid, Valid }
 import cats.data.NonEmptyList
 import cats.implicits._
 
-import shogi.format.{ Reader, Tag, Tags }
+import shogi.format.{ ParsedMove, Reader, Tag, Tags }
 import shogi.format.forsyth.Sfen
 import shogi.format.usi.Usi
 
 case class Replay(setup: Game, state: Game) {
   def apply(game: Game) = copy(state = game)
 
-  def addMoveOrDrop(moveOrDrop: MoveOrDrop) = copy(state = state(moveOrDrop))
+  def addMove(move: Move) = copy(state = state(move))
+
+  def addUsi(usi: Usi) = addMove(usi match {
+    case m: Usi.Move => m(state.situation)
+    case d: Usi.Drop => d(state.situation)
+  })
+
 }
 
 object Replay {
@@ -20,12 +26,12 @@ object Replay {
   def apply(game: Game) = new Replay(game, game)
 
   def apply(
-      usis: Seq[Usi],
+      parsedMoves: Seq[ParsedMove],
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): Reader.Result =
-    Reader.fromUsi(
-      usis,
+    Reader.fromParsedMove(
+      parsedMoves,
       Tags(
         List(
           initialSfen map { sfen =>
@@ -39,14 +45,14 @@ object Replay {
     )
 
   def replay(
-      usis: Seq[Usi],
+      parsedMoves: Seq[ParsedMove],
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): Validated[String, Replay] = {
     val game = makeGame(initialSfen, variant)
-    usis.foldLeft[Validated[String, Replay]](valid(Replay(game))) { case (acc, usi) =>
+    parsedMoves.foldLeft[Validated[String, Replay]](valid(Replay(game))) { case (acc, parsedMove) =>
       acc andThen { replay =>
-        replay.state(usi) andThen { situation =>
+        replay.state(parsedMove) andThen { situation =>
           valid(Replay(game, situation))
         }
       }
@@ -54,13 +60,13 @@ object Replay {
   }
 
   def gamesWhileValid(
-      usis: Seq[Usi],
+      usis: Seq[ParsedMove],
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): (NonEmptyList[Game], Option[String]) = {
 
     @scala.annotation.tailrec
-    def mk(games: NonEmptyList[Game], usis: List[Usi]): (NonEmptyList[Game], Option[String]) =
+    def mk(games: NonEmptyList[Game], usis: List[ParsedMove]): (NonEmptyList[Game], Option[String]) =
       usis match {
         case Nil => (games, None)
         case usi :: rest =>
@@ -79,20 +85,44 @@ object Replay {
       usis: Seq[Usi],
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
-  ): Validated[String, NonEmptyList[Situation]] = {
+  ): NonEmptyList[Situation] = {
     val init = initialSfenToSituation(initialSfen, variant)
-    usis.foldLeft[Validated[String, NonEmptyList[Situation]]](valid(NonEmptyList.one(init))) {
-      case (acc, usi) =>
-        acc andThen { sits =>
-          sits.head(usi) andThen { sit =>
-            valid(sit :: sits)
-          }
-        }
-    } map (_.reverse)
+    situations(usis, init)
   }
 
-  def plyAtSfen(
+  def situations(
       usis: Seq[Usi],
+      situation: Situation
+  ): NonEmptyList[Situation] = usis
+    .foldLeft[NonEmptyList[Situation]](NonEmptyList.one(situation)) {
+      // Prepend is a constant-time operation.
+      case (acc, usi) => acc.head(usi) :: acc
+    }
+    .reverse
+
+  implicit def apply(
+      situation: Situation,
+      usis: Seq[Usi]
+  ): List[Move] = situations(usis, situation).tail map { _.history.lastMove.get }
+
+  def situations(
+      history: History,
+      variant: shogi.variant.Variant,
+      moves: Seq[Move]
+  ): NonEmptyList[Situation] = {
+    val init = initialSfenToSituation(history.initialSfen, variant)
+    situations(init, moves)
+  }
+
+  def situations(
+      situation: Situation,
+      moves: Seq[Move]
+  ): NonEmptyList[Situation] = moves
+    .foldLeft[NonEmptyList[Situation]](NonEmptyList.one(situation)) { (acc, move) => acc.head(move) :: acc }
+    .reverse
+
+  def plyAtSfen(
+      usis: Seq[ParsedMove],
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant,
       atSfen: Sfen
@@ -100,7 +130,7 @@ object Replay {
     if (atSfen.toSituation(variant).isEmpty) invalid(s"Invalid Sfen $atSfen")
     else {
       @scala.annotation.tailrec
-      def recursivePlyAtSfen(sit: Situation, usis: List[Usi], ply: Int): Validated[String, Int] =
+      def recursivePlyAtSfen(sit: Situation, usis: List[ParsedMove], ply: Int): Validated[String, Int] =
         usis match {
           case Nil => invalid(s"Can't find $atSfen, reached ply $ply")
           case usi :: rest =>
@@ -115,37 +145,6 @@ object Replay {
       val sit = initialSfenToSituation(initialSfen, variant)
       recursivePlyAtSfen(sit, usis.toList, initialSfen.flatMap(_.moveNumber) | 1)
     }
-
-  // Use for trusted usis
-  // doesn't verify whether the moves are possible
-  def usiWithRoleWhilePossible(
-      usis: Seq[Usi],
-      initialSfen: Option[Sfen],
-      variant: shogi.variant.Variant
-  ): List[Usi.WithRole] = {
-
-    @scala.annotation.tailrec
-    def mk(roleMap: Map[Pos, Role], usis: List[Usi], roles: List[Usi.WithRole]): List[Usi.WithRole] =
-      usis match {
-        case Nil => roles
-        case usi :: rest =>
-          usi match {
-            case Usi.Move(orig, dest, prom) =>
-              roleMap.get(orig) match {
-                case Some(role) => {
-                  val maybePromoted = variant.promote(role).filter(_ => prom) | role
-                  mk(roleMap - orig + (dest -> maybePromoted), rest, Usi.WithRole(usi, role) :: roles)
-                }
-                case None => roles
-              }
-            case Usi.Drop(role, pos) =>
-              mk(roleMap + (pos -> role), rest, Usi.WithRole(usi, role) :: roles)
-          }
-      }
-
-    val init = initialSfenToSituation(initialSfen, variant)
-    mk(init.board.pieces.map { case (k, v) => k -> v.role }, usis.toList, Nil).reverse
-  }
 
   private def initialSfenToSituation(initialSfen: Option[Sfen], variant: shogi.variant.Variant): Situation =
     initialSfen.flatMap(_.toSituation(variant)) | Situation(variant)

@@ -214,7 +214,7 @@ object CsaParser {
               if (Standard.handRoles contains role) valid(role)
               else invalid(s"$role can't be dropped in standard shogi")
             pos <- Pos.allNumberKeys get posS toValid s"Cannot parse destination square in drop: $str"
-          } yield Drop(
+          } yield ParsedDrop(
             role = role,
             pos = pos,
             metas = Metas(

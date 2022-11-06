@@ -5,6 +5,8 @@ import cats.implicits._
 
 class PsnParserPerfTest extends ShogiTest {
 
+  // args(skipAll = true)
+
   val nb         = Fixtures.gamesForPerfTest.length
   val iterations = 10
 

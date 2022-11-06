@@ -5,9 +5,7 @@ import Pos._
 
 class DumperTest extends ShogiTest {
 
-  args(skipAll = true)
-
-  val outebisha = makeGame.playMoves(
+  /*val outebisha = makeGame.playMoves(
     (SQ7G, SQ7F, false),
     (SQ3C, SQ3D, false),
     (SQ7F, SQ7E, false),
@@ -27,90 +25,83 @@ class DumperTest extends ShogiTest {
   "standard game" should {
     "move list" in {
       "outebisha" in {
-        outebisha must beValid.like { case ms =>
-          ms must_== "P-7f P-3d P-7e P-8d R-7h P-8e K-4h P-8f Px8f Rx8f P-7d Px7d Bx22+ Sx22"
+        Dumper(outebisha) must_== "P-7f P-3d P-7e P-8d R-7h P-8e K-4h P-8f Px8f Rx8f P-7d Px7d Bx2b+ Sx2b"
             .split(' ')
             .toList
-        }
       }
     }
-  }
+  }*/
 
   "ambiguous moves" should {
     "ambiguous file only" in {
-      val game = Game("""
-k
-
-
-
-
-
-P   K  P
-R      R
-""")
-      game.playMoves((SQ2H, SQ8H, false)) /*map (_.psnMoves)*/ must beValid.like { case ms =>
-        ms must_== List("R2-8h")
-      }
+      val situation = Game("""
+k . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+P . . . K . . . P
+R . . . . . . . R
+""").situation
+      Dumper(situation, PieceMove(Piece(Sente, Rook), SQ9I, SQ8I, false)) must_== "R9-8i"
     }
     "ambiguous rank only" in {
-      val game = Game("""
-k
-
-
- N
-
-
-    K  P
- N
-""")
-      game.playMoves((SQ5G, SQ5H, false)) /*map (_.psnMoves)*/ must beValid.like { case ms =>
-        ms must_== List("Gg-5h")
-      }
+      val situation = Game("""
+. . . . k . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . S . . .
+. . . . . . . . .
+. . . . K S . . .
+""").situation
+      Dumper(situation, PieceMove(Piece(Sente, Silver), SQ4I, SQ5H, false)) must_== "Si-5h"
     }
     "ambiguous file and rank" in {
-      val game = Game("""
-
-
-  G
-  GG
-
-
-    K
-k
-""")
-      game.playMoves((SQ6E, SQ5D, false)) /*map (_.psnMoves)*/ must beValid.like { case ms =>
-        ms must_== List("G6e-5d")
-      }
+      val situation = Game("""
+. . . . k . . . .
+. . . . . . . . .
+. . . G . . . . .
+. . . G G . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . K . . . .
+""").situation
+      Dumper(situation, PieceMove(Piece(Sente, Gold), SQ6D, SQ5C, false)) must_== "G6d-5c"
     }
     "unambiguous file" in {
-      val game = Game("""
-k
-
-
-
-
-
-P      P
-R   K  R
-""")
-      game.playMoves((SQ2H, SQ4H, false)) /*map (_.psnMoves)*/ must beValid.like { case ms =>
-        ms must_== List("R-4h")
-      }
+      val situation = Game("""
+. . . . k . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+P . . . . . . . P
+R . . . K . . . R
+""").situation
+      Dumper(situation, PieceMove(Piece(Sente, Rook), SQ9I, SQ8I, false)) must_== "R-8i"
     }
     "unambiguous rank" in {
-      val game = Game("""
-k
-
-   KGr
-
-    G
-
-
-
-""")
-      game.playMoves((SQ5F, SQ5E, false)) /*map (_.psnMoves)*/ must beValid.like { case ms =>
-        ms must_== List("G-e5")
-      }
+      val situation = Game("""
+. . . . k . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . G . . .
+. . . . . . . . .
+. . . . K G . . .
+""").situation
+      Dumper(situation, PieceMove(Piece(Sente, Gold), SQ4I, SQ5H, false)) must_== "G-5h"
     }
   }
 }

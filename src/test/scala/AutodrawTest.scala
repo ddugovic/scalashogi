@@ -15,15 +15,16 @@ class AutodrawTest extends ShogiTest {
         makeSituation.autoDraw must_== false
       }
       "opened" in {
-        makeGame.playMoves(
-          (SQ5G, SQ5F, false),
-          (SQ5C, SQ5D, false),
-          (SQ7G, SQ7F, false),
-          (SQ5D, SQ5E, false),
-          (SQ5F, SQ5E, false)
-        ) map { g =>
-          g.situation.autoDraw
-        } must beValid(false)
+        makeGame
+          .apply(
+            (SQ5G, SQ5F, false),
+            (SQ5C, SQ5D, false),
+            (SQ7G, SQ7F, false),
+            (SQ5D, SQ5E, false),
+            (SQ5F, SQ5E, false)
+          )
+          .situation
+          .autoDraw must beFalse
       }
       "two kings with nothing in hand" in {
         """
@@ -62,14 +63,10 @@ K . . . . N .""".autoDraw must_== false
         (SQ7B, SQ8B, false)
       )
       "should be fourfold" in {
-        makeGame.playMoves(moves: _*) must beValid.like { case g =>
-          g.situation.autoDraw must beTrue
-        }
+        makeGame.apply(moves: _*).situation.autoDraw must beTrue
       }
       "should not be fourfold" in {
-        makeGame.playMoves(moves.dropRight(1): _*) must beValid.like { case g =>
-          g.situation.autoDraw must beFalse
-        }
+        makeGame.apply(moves.dropRight(1): _*).situation.autoDraw must beFalse
       }
     }
   }
@@ -85,7 +82,7 @@ K . . . . N .""".autoDraw must_== false
     "on a single pawn" in {
       val position = Sfen("2p2k3/9/9/9/9/9/9/9/4K4 b - 1")
       val game     = sfenToGame(position, Standard)
-      val newGame = game flatMap (_.playMove(
+      val newGame = game map (_.playMove(
         Pos.SQ5I,
         Pos.SQ5H
       ))

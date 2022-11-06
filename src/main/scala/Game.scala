@@ -4,11 +4,10 @@ import cats.data.Validated
 
 import shogi.format.forsyth.Sfen
 import shogi.format.ParsedMove
-import shogi.format.usi.Usi
 
 case class Game(
     situation: Situation,
-    usiMoves: Vector[Usi] = Vector.empty,
+    moves: List[Move] = List.empty,
     clock: Option[Clock] = None,
     plies: Int = 0,
     startedAtPly: Int = 0,
@@ -19,20 +18,16 @@ case class Game(
     copy(
       situation = sit,
       plies = plies + 1,
-      usiMoves = sit.history.lastMove.fold(usiMoves)(usiMoves :+ _),
+      moves = sit.history.lastMove.fold(moves)(moves :+ _),
       clock = clock map { c =>
         val newC = c.step(metrics, sit.status.isEmpty)
         if (plies - startedAtPly == 1) newC.start else newC
       }
     )
 
-  def apply(usi: Usi, metrics: MoveMetrics): Validated[String, Game] =
-    situation(usi).map(applySituation(_, metrics))
+  def apply(move: Move, metrics: MoveMetrics): Game = applySituation(situation(move), metrics)
 
-  def apply(usi: Usi): Validated[String, Game] =
-    situation(usi).map(applySituation(_))
-
-  def apply(moveOrDrop: MoveOrDrop): Game = applySituation(situation(moveOrDrop))
+  def apply(move: Move): Game = applySituation(situation(move))
 
   def apply(parsedMove: ParsedMove, metrics: MoveMetrics): Validated[String, Game] =
     situation(parsedMove).map(applySituation(_, metrics))

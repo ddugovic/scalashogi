@@ -8,11 +8,9 @@ class PlayPerfTest extends ShogiTest {
 
   val nb         = 100
   val iterations = 10
-  // val nb = 1
-  // val iterations = 1
 
   def runOne =
-    makeGame.playMoves(
+    makeGame(
       (SQ7G, SQ7F, false),
       (SQ8C, SQ8D, false),
       (SQ7I, SQ6H, false),
@@ -30,7 +28,6 @@ class PlayPerfTest extends ShogiTest {
 
   "playing a game" should {
     "many times" in {
-      runOne must beValid
       if (nb * iterations > 1) {
         println("warming up")
         run()

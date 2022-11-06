@@ -11,42 +11,42 @@ class SfenTest extends ShogiTest {
 
   "the forsyth notation" should {
     "export" in {
+      // exports from Game to Sfen (or Sfen to String)
       "game opening" in {
         val moves = List((SQ7G, SQ7F, false), (SQ3C, SQ3D, false), (SQ8H, SQ2B, false), (SQ3A, SQ2B, false))
         "new game" in {
-          makeGame.toSfen must_== Sfen("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1")
+          Sfen("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1") must_== makeGame.toSfen
         }
         "new game board only" in {
-          Sfen(Sfen.boardToString(makeSituation.board, Standard)) must_== Sfen(
-            "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL"
+          "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL" must_== Sfen.boardToString(
+            makeSituation.board,
+            Standard
           )
         }
         "one move" in {
-          makeGame.playMoveList(moves take 1) must beValid.like { case g =>
-            g.toSfen must_== Sfen("lnsgkgsnl/1r5b1/ppppppppp/9/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL w - 2")
-          }
+          Sfen("lnsgkgsnl/1r5b1/ppppppppp/9/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL w - 2") must_== makeGame(
+            moves take 1
+          ).toSfen
         }
         "2 moves" in {
-          makeGame.playMoveList(moves take 2) must beValid.like { case g =>
-            g.toSfen must_== Sfen("lnsgkgsnl/1r5b1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL b - 3")
-          }
+          Sfen("lnsgkgsnl/1r5b1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL b - 3") must_== makeGame(
+            moves take 2
+          ).toSfen
         }
         "3 moves" in {
-          makeGame.playMoveList(moves take 3) must beValid.like { case g =>
-            g.toSfen must_== Sfen("lnsgkgsnl/1r5B1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w B 4")
-          }
+          Sfen("lnsgkgsnl/1r5B1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w B 4") must_== makeGame(
+            moves take 3
+          ).toSfen
         }
         "4 moves" in {
-          makeGame.playMoveList(moves take 4) must beValid.like { case g =>
-            g.toSfen must_== Sfen("lnsgkg1nl/1r5s1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL b Bb 5")
-          }
+          Sfen("lnsgkg1nl/1r5s1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL b Bb 5") must_== makeGame(
+            moves take 4
+          ).toSfen
         }
         "5 drop" in {
-          makeGame.playMoveList(moves take 4) must beValid.like { case g =>
-            g.playDrop(Bishop, SQ5E) must beValid.like { case g2 =>
-              g2.toSfen must_== Sfen("lnsgkg1nl/1r5s1/pppppp1pp/6p2/4B4/2P6/PP1PPPPPP/7R1/LNSGKGSNL w b 6")
-            }
-          }
+          Sfen("lnsgkg1nl/1r5s1/pppppp1pp/6p2/4B4/2P6/PP1PPPPPP/7R1/LNSGKGSNL w b 6") must_== makeGame(
+            moves take 4
+          ).playDrop(Bishop, SQ5E).toSfen
         }
       }
 
@@ -54,9 +54,7 @@ class SfenTest extends ShogiTest {
     "import" in {
       val moves = List((SQ7G, SQ7F, false), (SQ3C, SQ3D, false), (SQ8H, SQ2B, false), (SQ3A, SQ2B, false))
       def compare(ms: List[(Pos, Pos, Boolean)], sfen: Sfen) =
-        makeGame.playMoveList(ms) must beValid.like { case g =>
-          sfen must_== g.toSfen
-        }
+        sfen must_== makeGame.apply(ms).toSfen
       "new game" in {
         compare(
           Nil,

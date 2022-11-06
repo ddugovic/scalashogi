@@ -12,6 +12,9 @@ final case class DropActor(
       situation.variant.dropLegalityFilter(this)
     else Nil
 
+  def drops: List[PieceDrop] =
+    destinations.map(PieceDrop(situation, piece.role, _))
+
   def toUsis: List[Usi.Drop] =
     destinations.map(Usi.Drop(piece.role, _))
 

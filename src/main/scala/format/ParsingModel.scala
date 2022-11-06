@@ -2,9 +2,7 @@ package shogi
 package format
 
 import cats.data.Validated
-import cats.data.Validated.valid
-
-import shogi.format.usi.Usi
+import cats.data.Validated.{ invalid, valid }
 
 case class ParsedNotation(
     initialPosition: InitialPosition,
@@ -20,7 +18,7 @@ object ParsedMoves {
 
 sealed trait ParsedMove {
 
-  def toUsi(sit: Situation): Validated[String, Usi]
+  def toMove(sit: Situation): Validated[String, Move]
 
   def positions: List[Pos]
 
@@ -51,7 +49,10 @@ case class KifMove(
     metas: Metas = Metas.empty
 ) extends ParsedMove {
 
-  def toUsi(sit: Situation) = valid(Usi.Move(orig, dest, promotion))
+  def toMove(sit: Situation): Validated[String, Move] =
+    Validated.fromOption(sit.board(orig), s"No piece at $orig") map { p =>
+      PieceMove(sit.board, p, orig, dest, promotion)
+    }
 
   def withMetas(m: Metas) = copy(metas = m)
 
@@ -66,9 +67,9 @@ case class CsaMove(
     metas: Metas = Metas.empty
 ) extends ParsedMove {
 
-  def toUsi(sit: Situation): Validated[String, Usi] =
+  def toMove(sit: Situation): Validated[String, Move] =
     Validated.fromOption(sit.board(orig), s"No piece at $orig") map { p =>
-      Usi.Move(orig, dest, role != p.role)
+      PieceMove(sit.board, p, orig, dest, role != p.role)
     }
 
   def withMetas(m: Metas) = copy(metas = m)
@@ -78,14 +79,15 @@ case class CsaMove(
 }
 
 // All notations can share drop
-case class Drop(
+case class ParsedDrop(
     role: Role,
     pos: Pos,
     metas: Metas = Metas.empty
 ) extends ParsedMove {
 
-  def toUsi(sit: Situation) =
-    valid(Usi.Drop(role, pos))
+  def toMove(sit: Situation): Validated[String, Move] =
+    if (sit.variant.handRoles contains role) valid(PieceDrop(Piece(sit.color, role), pos))
+    else invalid(s"$role can't be dropped in ${sit.variant} shogi")
 
   def withMetas(m: Metas) = copy(metas = m)
 

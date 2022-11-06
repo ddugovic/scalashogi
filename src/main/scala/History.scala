@@ -1,10 +1,9 @@
 package shogi
 
-import shogi.format.usi.Usi
 import shogi.format.forsyth.Sfen
 
 case class History(
-    lastMove: Option[Usi],
+    lastMove: Option[Move],
     positionHashes: PositionHash,
     initialSfen: Option[Sfen]
 ) {
@@ -25,7 +24,7 @@ case class History(
 
   lazy val fourfoldRepetition = isRepetition(4)
 
-  def withLastMove(u: Usi) = copy(lastMove = Some(u))
+  def withLastMove(m: Move) = copy(lastMove = Some(m))
 
   def withPositionHashes(h: PositionHash) = copy(positionHashes = h)
 
@@ -33,7 +32,7 @@ case class History(
 
   override def toString = {
     val positions = (positionHashes grouped Hash.size).toList
-    s"${lastMove.fold("-")(_.usi)} ${positions.map(Hash.debug).mkString(" ")} ${initialSfen.getOrElse("-")}"
+    s"${lastMove} ${positions.map(Hash.debug).mkString(" ")} ${initialSfen.getOrElse("-")}"
   }
 }
 

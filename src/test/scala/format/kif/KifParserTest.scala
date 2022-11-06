@@ -12,7 +12,7 @@ class KifParserTest extends ShogiTest {
   def parseMove(str: String, lastDest: Option[Pos] = None) = KifParser.MoveParser(str, lastDest, Standard)
 
   "drop" in {
-    parseMove("６四歩打") must beValid.like { case d: Drop =>
+    parseMove("６四歩打") must beValid.like { case d: ParsedDrop =>
       d.role must_== Pawn
       d.pos must_== Pos.SQ6D
     }
@@ -40,7 +40,7 @@ class KifParserTest extends ShogiTest {
     }
     "drop" in {
       parser("７四歩打") must beValid.like { case p =>
-        p.parsedMoves.value.headOption must beSome.like { case d: Drop =>
+        p.parsedMoves.value.headOption must beSome.like { case d: ParsedDrop =>
           d.role must_== Pawn
           d.pos must_== Pos.SQ7D
         }

@@ -4,6 +4,7 @@ package opening
 import cats.syntax.option._
 
 import shogi.format.forsyth.Sfen
+import shogi.format.usi.Usi
 
 object FullOpeningDB {
 
@@ -18,21 +19,21 @@ object FullOpeningDB {
   val SEARCH_MAX_PLIES = 40
 
   // assumes standard initial SFEN and variant
-  def search(usis: Seq[shogi.format.usi.Usi]): Option[FullOpening.AtPly] =
+  def search(usis: Seq[Usi]): Option[FullOpening.AtPly] =
     shogi.Replay
       .situations(
         usis.take(SEARCH_MAX_PLIES),
         None,
         variant.Standard
       )
-      .toOption
-      .flatMap {
-        _.zipWithIndex.tail.reverse.foldLeft[Option[FullOpening.AtPly]](None) {
-          case (None, (situation, ply)) =>
-            val sfen = situation.toSfen.truncate
-            bySfen get sfen.value map (_ atPly ply)
-          case (found, _) => found
-        }
+      .zipWithIndex
+      .tail
+      .reverse
+      .foldLeft[Option[FullOpening.AtPly]](None) {
+        case (None, (situation, ply)) =>
+          val sfen = situation.toSfen.truncate
+          bySfen get sfen.value map (_ atPly ply)
+        case (found, _) => found
       }
 
   def searchInSfens(sfens: Seq[Sfen]): Option[FullOpening] =

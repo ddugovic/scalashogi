@@ -4,7 +4,6 @@ package format
 import cats.data.Validated
 
 import shogi.format.psn._
-import shogi.format.usi.Usi
 
 object Reader {
 
@@ -24,14 +23,14 @@ object Reader {
   def fromParsedNotation(parsed: ParsedNotation, op: ParsedMoves => ParsedMoves): Result =
     makeReplayFromParsedMoves(makeGame(parsed.tags), op(parsed.parsedMoves))
 
-  def fromUsi(
-      usis: Seq[Usi],
+  def fromParsedMove(
+      parsedMoves: Iterable[ParsedMove],
       tags: Tags
   ): Result =
-    makeReplayFromUsi(makeGame(tags), usis)
+    makeReplayFromParsedMove(makeGame(tags), parsedMoves)
 
-  private def makeReplayFromUsi(game: Game, usis: Seq[Usi]): Result =
-    usis.foldLeft[Result](Result.Complete(Replay(game))) {
+  private def makeReplayFromParsedMove(game: Game, parsedMoves: Iterable[ParsedMove]): Result =
+    parsedMoves.foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), usi) =>
         replay
           .state(usi)
@@ -89,7 +88,7 @@ object Reader {
       case (Result.Complete(replay), san) =>
         san(replay.state.situation).fold(
           err => Result.Incomplete(replay, err),
-          moveOrDrop => Result.Complete(replay addMoveOrDrop moveOrDrop)
+          move => Result.Complete(replay addMove move)
         )
       case (r: Result.Incomplete, _) => r
     }

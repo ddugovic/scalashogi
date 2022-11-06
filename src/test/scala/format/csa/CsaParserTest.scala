@@ -10,7 +10,7 @@ class CsaParserTest extends ShogiTest {
   def parseMove(str: String) = CsaParser.MoveParser(str)
 
   "drop" in {
-    parseMove("-0077FU") must beValid.like { case d: Drop =>
+    parseMove("-0077FU") must beValid.like { case d: ParsedDrop =>
       d.role must_== Pawn
       d.pos must_== Pos.SQ7G
     }
@@ -36,7 +36,7 @@ class CsaParserTest extends ShogiTest {
     }
     "drop" in {
       parser("PI,0077KI") must beValid.like { case p =>
-        p.parsedMoves.value.headOption must beSome.like { case d: Drop =>
+        p.parsedMoves.value.headOption must beSome.like { case d: ParsedDrop =>
           d.role must_== Gold
           d.pos must_== Pos.SQ7G
         }

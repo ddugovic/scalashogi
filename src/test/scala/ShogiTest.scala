@@ -1,15 +1,11 @@
 package shogi
 
-import cats.data.Validated
 import cats.syntax.option._
 import org.specs2.matcher.Matcher
 import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
-import scala.annotation.nowarn
-
 import format.forsyth.{ Sfen, Visual }
-import format.usi.Usi
 import variant._
 
 trait ShogiTest extends Specification with ValidatedMatchers {
@@ -39,32 +35,30 @@ trait ShogiTest extends Specification with ValidatedMatchers {
 
     def as(color: Color): Game = game.withColor(color)
 
-    def playMoves(moves: (Pos, Pos, Boolean)*): Validated[String, Game] = playMoveList(moves)
-
-    @nowarn def playMoveList(moves: Seq[(Pos, Pos, Boolean)]): Validated[String, Game] = {
-      val vg = moves.foldLeft[Validated[String, Game]](Validated.valid(game)) {
-        case (vg, (orig, dest, prom)) =>
-          vg.foreach { _.situation.moveDestinations }
-          val ng = vg flatMap { g =>
-            g(Usi.Move(orig, dest, prom))
-          }
-          ng
+    // moves can be a simple sequence
+    def apply(moves: (Pos, Pos, Boolean)*): Game =
+      moves.foldLeft[Game](game) { case (g, (orig, dest, prom)) =>
+        g(PieceMove(g.situation, orig, dest, prom))
       }
-      vg
-    }
+
+    // moves can be any sort of IterableOnce, including List
+    def apply(moves: IterableOnce[(Pos, Pos, Boolean)]): Game =
+      moves.iterator.foldLeft[Game](game) { case (g, (orig, dest, prom)) =>
+        g(PieceMove(g.situation, orig, dest, prom))
+      }
 
     def playMove(
         orig: Pos,
         dest: Pos,
         promotion: Boolean = false
-    ): Validated[String, Game] =
-      game.apply(Usi.Move(orig, dest, promotion))
+    ): Game =
+      game.apply(PieceMove(game.situation, orig, dest, promotion))
 
     def playDrop(
         role: Role,
         dest: Pos
-    ): Validated[String, Game] =
-      game.apply(Usi.Drop(role, dest))
+    ): Game =
+      game.apply(PieceDrop(game.situation, role, dest))
 
     def withClock(c: Clock) = game.copy(clock = Some(c))
   }
@@ -95,16 +89,6 @@ trait ShogiTest extends Specification with ValidatedMatchers {
   def bePoss(situation: Situation, visual: String): Matcher[Option[Iterable[Pos]]] =
     beSome.like { case p =>
       Visual.addNewLines(Visual.render(situation, Map(p -> 'x'))) must_== visual
-    }
-
-  def beSituation(visual: String): Matcher[Validated[String, Situation]] =
-    beValid.like { case s =>
-      s.visual must_== ((Visual parse visual).get).visual
-    }
-
-  def beGame(visual: String): Matcher[Validated[String, Game]] =
-    beValid.like { case g =>
-      g.situation.visual must_== ((Visual parse visual).get).visual
     }
 
   def sortPoss(poss: Seq[Pos]): Seq[Pos] = poss sortBy (_.toString)

@@ -16,20 +16,19 @@ case class Situation(
     variant: Variant
 ) {
 
-  def apply(usi: Usi): Validated[String, Situation] =
-    usi match {
-      case u: Usi.Move => variant.move(this, u)
-      case u: Usi.Drop => variant.drop(this, u)
+  def apply(move: Move): Situation =
+    move match {
+      case move: PieceMove => variant.applyMove(this, move)
+      case drop: PieceDrop => variant.applyDrop(this, drop)
     }
 
-  def apply(moveOrDrop: MoveOrDrop): Situation =
-    moveOrDrop match {
-      case Left(move)  => variant.applyMove(this, move)
-      case Right(drop) => variant.applyDrop(this, drop)
-    }
+  def apply(usi: Usi): Situation = apply(usi match {
+    case m: Usi.Move => m(board.pieces)
+    case d: Usi.Drop => d(color)
+  })
 
   def apply(parsedMove: ParsedMove): Validated[String, Situation] =
-    parsedMove.toUsi(this) andThen (apply _)
+    parsedMove.toMove(this) map apply
 
   // Moves
 
@@ -148,7 +147,7 @@ case class Situation(
 
   def toSfen: Sfen = Sfen(this)
 
-  override def toString = s"${variant.name}\n$visual\nLast Move: ${history.lastMove.fold("-")(_.usi)}\n"
+  override def toString = s"${variant.name}\n$visual\nLast Move: ${history.lastMove}\n"
 }
 
 object Situation {

@@ -4,6 +4,8 @@ package usi
 
 class BinaryPerfTest extends ShogiTest {
 
+  // args(skipAll = true)
+
   val usis       = format.usi.Fixtures.prod500standard.map(Usi.readList(_).get)
   val iterations = 15
 

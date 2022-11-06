@@ -1,5 +1,6 @@
 package shogi
-package format.usi
+package format
+package usi
 
 import cats.implicits._
 
@@ -29,6 +30,11 @@ object Usi {
     def promotionString = if (promotion) "+" else ""
 
     def positions = List(orig, dest)
+
+    def apply(pieces: PieceMap): shogi.Move =
+      PieceMove(pieces(orig), orig, dest, pieces.contains(dest), promotion)
+
+    def apply(situation: Situation): shogi.Move = apply(situation.board.pieces)
   }
 
   object Move {
@@ -49,6 +55,10 @@ object Usi {
 
     def positions = List(pos)
 
+    def apply(color: Color): shogi.Move =
+      PieceDrop(Piece(color, role), pos)
+
+    def apply(situation: Situation): shogi.Move = apply(situation.color)
   }
 
   object Drop {
@@ -68,10 +78,9 @@ object Usi {
       Usi.Drop(usiStr)
     else Usi.Move(usiStr)
 
-  def readList(moves: String): Option[List[Usi]] =
-    readList(moves.split(' ').toList)
-
   def readList(moves: Seq[String]): Option[List[Usi]] =
     moves.toList.map(apply).sequence
 
+  def readList(moves: String): Option[List[Usi]] =
+    readList(moves.split(' ').toList)
 }

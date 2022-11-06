@@ -6,13 +6,10 @@ class DividerTest extends ShogiTest {
 
   // more tests wanted
   "the divider finds middlegame and endgame" should {
-    "game1" in {
+    "fromProd2" in {
       val situations = Replay.situations(usis, None, variant.Standard).toOption.get
       val divided    = Divider(situations.toList)
-      println("Game 1 => " + divided)
-      divided.middle must beSome.like { case x =>
-        x must beBetween(10, 30)
-      }
+      divided.middle must beSome.like { _ must beBetween(10, 30) }
       divided.end must beNone
     }
   }

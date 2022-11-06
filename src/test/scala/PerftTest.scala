@@ -1,25 +1,26 @@
 package shogi
 
 import format.forsyth.Sfen
-import format.usi.Usi
 
 class PerftTest extends ShogiTest {
 
-  def drops(sit: Situation): List[Usi] =
+  // args(skipAll = true)
+
+  def drops(sit: Situation): List[Move] =
     sit
       .dropActorsOf(sit.color)
-      .flatMap(_.toUsis)
+      .flatMap(_.drops)
 
-  def moves(sit: Situation): List[Usi] =
+  def moves(sit: Situation): List[Move] =
     sit
       .moveActorsOf(sit.color)
-      .flatMap(_.toUsis)
+      .flatMap(_.moves(sit))
 
   def perft(game: Game, depth: Int): Int =
     if (depth > 0) {
-      val mds: List[Usi] = moves(game.situation) ::: drops(game.situation)
+      val mds: List[Move] = moves(game.situation) ::: drops(game.situation)
       mds.foldLeft(0) { (p, u) =>
-        p + perft(game(u).toOption.get, depth - 1)
+        p + perft(game(u), depth - 1)
       }
     } else 1
 

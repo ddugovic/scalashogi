@@ -4,10 +4,8 @@ class DividerPerfTest extends ShogiTest {
 
   // args(skipAll = true)
 
-  val nb         = 500
+  val nb         = 100
   val iterations = 10
-  // val nb = 1
-  // val iterations = 1
 
   val usis       = shogi.format.usi.Usi.readList(format.usi.Fixtures.fromProd2).get
   val gameReplay = Replay.situations(usis, None, variant.Standard).toOption.get
@@ -16,9 +14,6 @@ class DividerPerfTest extends ShogiTest {
 
   "playing a game" should {
     "many times" in {
-      // runOne.end must beSome.like {
-      //   case x => x must beBetween(65, 80)
-      // }
       if (nb * iterations > 1) {
         println("warming up")
         run()

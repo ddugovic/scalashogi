@@ -21,6 +21,8 @@ sealed trait Role {
   // Generating next possible position of piece based on previous positions
   // for pieces that don't have long range attacks it's None
   def dir(from: Pos, to: Pos): Option[Direction]
+
+  override def toString = forsythUpper
 }
 
 case object King extends Role {

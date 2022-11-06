@@ -74,4 +74,8 @@ object Piece {
       Piece(Color.fromSente(s.take(1) == "+"), _)
     }
 
+  val all: List[Piece] = Color.all flatMap { color =>
+    Role.all map (Piece(color, _))
+  }
+
 }

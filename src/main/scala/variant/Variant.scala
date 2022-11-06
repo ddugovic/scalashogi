@@ -1,12 +1,9 @@
 package shogi
 package variant
 
-import cats.data.Validated
-import cats.syntax.option._
 import scala.annotation.nowarn
 
 import shogi.format.forsyth.Sfen
-import shogi.format.usi.Usi
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
@@ -129,10 +126,10 @@ abstract class Variant private[variant] (
     }
   }
 
-  // Finalizes situation after usi, used both for moves and drops
-  protected def finalizeSituation(beforeSit: Situation, board: Board, hands: Hands, usi: Usi): Situation = {
+  // Finalizes situation after move or drop
+  protected def finalizeSituation(beforeSit: Situation, board: Board, hands: Hands, move: Move): Situation = {
     val newSit = beforeSit.copy(board = board, hands = hands).switch
-    val h = beforeSit.history.withLastMove(usi).withPositionHashes {
+    val h = beforeSit.history.withLastMove(move).withPositionHashes {
       val basePositionHashes =
         if (beforeSit.history.positionHashes.isEmpty) Hash(beforeSit) else beforeSit.history.positionHashes
       Hash(newSit) ++ basePositionHashes
@@ -140,41 +137,7 @@ abstract class Variant private[variant] (
     newSit.withHistory(h)
   }
 
-  def move(sit: Situation, usi: Usi.Move): Validated[String, Situation] =
-    for {
-      actor <- sit.moveActorAt(usi.orig) toValid s"No piece on ${usi.orig}"
-      _     <- Validated.cond(actor is sit.color, (), s"Not my piece on ${usi.orig}")
-      _ <- Validated.cond(
-        !usi.promotion || canPromote(actor.piece, usi.orig, usi.dest),
-        (),
-        s"${actor.piece} cannot promote"
-      )
-      _ <- Validated.cond(
-        usi.promotion || !pieceInDeadZone(actor.piece, usi.dest),
-        (),
-        s"${actor.piece} needs to promote"
-      )
-      _ <- Validated.cond(
-        actor.destinations.exists(_ == usi.dest),
-        (),
-        s"Piece ${actor.piece} on ${usi.orig} cannot move to ${usi.dest}"
-      )
-      unpromotedCapture = sit.board(usi.dest).map(p => p.updateRole(unpromote) | p)
-      hands =
-        unpromotedCapture
-          .filter(c => handRoles.contains(c.role) && addCapturedPiecesToHand)
-          .fold(sit.hands)(sit.hands store _.switch)
-      board <-
-        (if (usi.promotion)
-           sit.board.promote(usi.orig, usi.dest, promote)
-         else
-           sit.board.move(
-             usi.orig,
-             usi.dest
-           )) toValid s"Can't update board with ${usi.usi} in \n${sit.toSfen}"
-    } yield finalizeSituation(sit, board, hands, usi)
-
-  def applyMove(sit: Situation, move: Move): Situation = {
+  def applyMove(sit: Situation, move: PieceMove): Situation = {
     val unpromotedCapture = sit.board(move.dest).map(p => p.updateRole(unpromote) | p)
     val hands =
       unpromotedCapture
@@ -185,23 +148,13 @@ abstract class Variant private[variant] (
         sit.board.promote(move.orig, move.dest, promote).get
       else
         sit.board.forceMove(move.piece, move.orig, move.dest)
-    finalizeSituation(sit, board, hands, move.toUsi)
+    finalizeSituation(sit, board, hands, move)
   }
 
-  def drop(sit: Situation, usi: Usi.Drop): Validated[String, Situation] =
-    for {
-      _ <- Validated.cond(sit.variant.supportsDrops, (), "Variant doesn't support drops")
-      piece = Piece(sit.color, usi.role)
-      actor <- sit.dropActorOf(piece) toValid s"No actor of $piece"
-      _     <- Validated.cond(actor.destinations.contains(usi.pos), (), s"Dropping $piece is not valid")
-      hands <- sit.hands.take(piece) toValid s"No $piece to drop on ${usi.pos}"
-      board <- sit.board.place(piece, usi.pos) toValid s"Can't drop ${usi.role} on ${usi.pos}, it's occupied"
-    } yield finalizeSituation(sit, board, hands, usi)
-
-  def applyDrop(sit: Situation, drop: Drop): Situation = {
+  def applyDrop(sit: Situation, drop: PieceDrop): Situation = {
     val hands = sit.hands.take(drop.piece).get
     val board = sit.board.forcePlace(drop.piece, drop.pos)
-    finalizeSituation(sit, board, hands, drop.toUsi)
+    finalizeSituation(sit, board, hands, drop)
   }
 
   @nowarn

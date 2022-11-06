@@ -3,7 +3,23 @@ package format.psn
 
 object Dumper {
 
-  def apply(situation: Situation, move: shogi.Move): String = {
+  def apply(game: Game): Seq[String] = {
+    Replay
+      .situations(game.situation, game.moves)
+      .toList
+      .sliding(2)
+      .map { pair =>
+        apply(pair.head, pair.tail.head.history.lastMove.get)
+      }
+      .toSeq
+  }
+
+  def apply(situation: Situation, move: shogi.Move): String = move match {
+    case m: PieceMove => apply(situation, m)
+    case d: PieceDrop => apply(d)
+  }
+
+  def apply(situation: Situation, move: PieceMove): String = {
     (move.piece.role match {
       case (role) =>
         // Check whether there is a need to disambiguate:
@@ -15,9 +31,9 @@ object Dumper {
         val candidates = situation.board.pieces collect {
           case (cpos, cpiece) if cpiece == move.piece && cpos != move.orig && cpiece.eyes(cpos, move.dest) =>
             cpos
-        } /*filter { cpos =>
-          situation.move(cpos, move.dest).isValid
-        }*/
+        } filter { cpos =>
+          situation.moveDestsFrom(cpos).get.contains(move.dest)
+        }
 
         val disambiguation = if (candidates.isEmpty) {
           ""
@@ -29,15 +45,9 @@ object Dumper {
           move.orig.usiKey
         }
 
-        s"${role.forsythUpper}$disambiguation${if (move.capture) "x" else ""}${move.dest.usiKey}"
-    }) + move.toUsi.promotionString
+        s"${role.forsythUpper}$disambiguation${if (move.capture) "x" else "-"}${move.dest.usiKey}"
+    }) + move.promotionString
   }
 
-  def apply(data: shogi.Move): String =
-    apply(
-      data.before,
-      data
-    )
-
-  def apply(drop: shogi.Drop): String = drop.toUsi.usi
+  def apply(drop: PieceDrop): String = drop.toString
 }

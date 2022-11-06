@@ -13,6 +13,4 @@ package object shogi extends scalalib.Common with scalalib.OrnicarOption with sc
   type HandMap  = Map[Role, Int]
 
   type PositionHash = Array[Byte]
-
-  type MoveOrDrop = Either[Move, Drop]
 }

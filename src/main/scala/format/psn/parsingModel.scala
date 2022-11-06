@@ -20,7 +20,7 @@ object Sans {
 // Standard Algebraic Notation
 sealed trait San {
 
-  def apply(situation: Situation): Validated[String, MoveOrDrop]
+  def apply(situation: Situation): Validated[String, shogi.Move]
 
   def metas: Metas
 
@@ -46,12 +46,12 @@ case class Std(
     metas: Metas = Metas.empty
 ) extends San {
 
-  def apply(situation: Situation) = move(situation) map Left.apply
+  def apply(situation: Situation) = move(situation)
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def move(situation: Situation): Validated[String, shogi.Move] =
-    situation.board.pieces.foldLeft(none[shogi.Move]) {
+  def move(situation: Situation): Validated[String, PieceMove] =
+    situation.board.pieces.foldLeft(none[PieceMove]) {
       case (None, (pos, piece))
           if piece.color == situation.color && piece.role == role && compare(
             file,
@@ -89,14 +89,14 @@ case class Drp(
     metas: Metas = Metas.empty
 ) extends San {
 
-  def apply(situation: Situation) = drop(situation) map Right.apply
+  def apply(situation: Situation) = drop(situation)
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def drop(situation: Situation): Validated[String, shogi.Drop] = {
+  def drop(situation: Situation): Validated[String, PieceDrop] = {
     val piece = Piece(situation.color, role)
     if (situation dropDestsOf piece contains dest)
-      Validated valid shogi.Drop(piece, dest, situation)
+      Validated valid PieceDrop(piece, dest)
     else Validated invalid s"No $role drop at $dest found: $this\n$situation"
   }
 }

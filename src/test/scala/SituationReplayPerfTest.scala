@@ -9,10 +9,11 @@ class SituationReplayPerfTest extends ShogiTest {
   val nb         = 100
   val iterations = 10
 
-  val usis = format.usi.Fixtures.prod500standard.take(nb).map(Usi.readList(_).get)
-  def runOne(usis: List[Usi]) =
-    Replay.situations(usis, None, variant.Standard)
-  def run() = { usis foreach runOne }
+  val situation                = makeSituation
+  val usis                     = format.usi.Fixtures.prod500standard.take(nb).map(Usi.readList(_).get)
+  val moves                    = usis map { Replay(situation, _) }
+  def runOne(moves: Seq[Move]) = Replay.situations(situation, moves)
+  def run() = { moves foreach runOne }
 
   "playing a game" should {
     "many times" in {

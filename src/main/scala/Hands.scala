@@ -31,6 +31,9 @@ case class Hands(sente: Hand, gote: Hand) {
   def roles: List[Role] =
     (sente.roles ::: gote.roles).distinct
 
+  def rolesOf(color: Color): List[Role] =
+    if (color == Sente) sente.roles else gote.roles
+
   def size: Int =
     sente.size + gote.size
 

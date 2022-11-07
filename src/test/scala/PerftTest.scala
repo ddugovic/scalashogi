@@ -16,13 +16,16 @@ class PerftTest extends ShogiTest {
       .moveActorsOf(sit.color)
       .flatMap(_.moves(sit))
 
-  def perft(game: Game, depth: Int): Int =
-    if (depth > 0) {
-      val mds: List[Move] = moves(game.situation) ::: drops(game.situation)
+  def perft(game: Game, depth: Int): Int = {
+    val ms: List[Move] = moves(game.situation)
+    val ds: List[Move] = drops(game.situation)
+    if (depth > 1) {
+      val mds = ms ::: ds
       mds.foldLeft(0) { (p, u) =>
         p + perft(game(u), depth - 1)
       }
-    } else 1
+    } else ms.size + ds.size
+  }
 
   "starting position" should {
     val game = Game(variant.Standard)
@@ -57,9 +60,9 @@ class PerftTest extends ShogiTest {
     "4 depth" in {
       perft(game, 4) must be equalTo 35401
     }
-    // "5 depth" in {
-    //  perft(game, 5) must be equalTo 533203
-    // }
+    "5 depth" in {
+      perft(game, 5) must be equalTo 533203
+    }
   }
 
   val random: List[(String, String, String)] = List(

@@ -8,30 +8,12 @@ class ReplayPerfTest extends ShogiTest {
 
   // args(skipAll = true)
 
-  val nb                  = 100
-  val situation           = makeSituation
-  val usis: Seq[Seq[Usi]] = format.usi.Fixtures.prod500standard.map(Usi.readList(_).get)
-  def parsedMove(before: Situation, after: Situation): ParsedMove =
-    after.history.lastMove.get match {
-      case m: PieceMove => shogi.format.CsaMove(m.dest, m.orig, before.board.pieces(m.orig).role)
-      case d: PieceDrop => shogi.format.ParsedDrop(d.role, d.pos)
-    }
-  val parsedMoves: Seq[Seq[ParsedMove]] = usis map {
-    // Converts NEL toList since NEL lacks sliding(2)
-    // https://stackoverflow.com/a/47006446 might be cleaner
-    // but zipped causes compiler warnings
-    Replay
-      .situations(_, situation)
-      .toList
-      .sliding(2)
-      .map { pair =>
-        parsedMove(pair.head, pair.tail.head)
-      }
-      .toSeq
-  }
-  val iterations = 10
+  val nb                                  = 100
+  val usis: List[List[Usi]]               = format.usi.Fixtures.prod500standard.map(Usi.readList(_).get)
+  val parsedMoves: List[List[ParsedMove]] = usis map parseTrustedUsis
+  val iterations                          = 10
 
-  def runOne(parsedMoves: Seq[ParsedMove]) =
+  def runOne(parsedMoves: List[ParsedMove]) =
     Replay.gamesWhileValid(parsedMoves, None, shogi.variant.Standard)
   def run() = { parsedMoves foreach runOne }
 

@@ -6,6 +6,7 @@ import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
 import format.forsyth.{ Sfen, Visual }
+import format.ParsedMove
 import variant._
 
 trait ShogiTest extends Specification with ValidatedMatchers {
@@ -17,6 +18,35 @@ trait ShogiTest extends Specification with ValidatedMatchers {
 
       def as(color: Color): Situation = ((Visual parse str).get).copy(color = color)
     }
+
+  implicit def replayTrustedUsis(situation: Situation, usis: List[format.usi.Usi]): List[Move] =
+    Replay
+      .situations(usis, situation)
+      .map { _.tail.map { _.history.lastMove.get } }
+      .toOption
+      .get
+      .toList
+
+  implicit def parsedMove(before: Situation, after: Situation): ParsedMove =
+    after.history.lastMove.get match {
+      case m: PieceMove => format.KifMove(m.dest, m.orig, before.board.pieces(m.orig).role, m.promotion)
+      case d: PieceDrop => format.ParsedDrop(d.role, d.pos)
+    }
+
+  implicit def parseTrustedUsis(usis: List[format.usi.Usi]): List[ParsedMove] =
+    // Converts NEL toList since NEL lacks sliding(2)
+    // https://stackoverflow.com/a/47006446 might be cleaner
+    // but zipped causes compiler warnings
+    Replay
+      .situations(usis, makeSituation)
+      .map {
+        _.toList
+          .sliding(2)
+          .map { pair => parsedMove(pair.head, pair.tail.head) }
+          .toList
+      }
+      .toOption
+      .get
 
   case class RichActor(actor: MoveActor) {
     def threatens(to: Pos): Boolean =

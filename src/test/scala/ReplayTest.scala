@@ -1,9 +1,11 @@
 package shogi
 
 import format.ParsedMove
+import format.usi.Usi
 
 class ReplayTest extends ShogiTest {
-  val parsedMoves: Seq[Seq[ParsedMove]] = Seq(Seq[ParsedMove]())
+  val usis: List[List[Usi]]               = shogi.format.usi.Fixtures.prod500standard.map(Usi.readList(_).get)
+  val parsedMoves: List[List[ParsedMove]] = usis map parseTrustedUsis
 
   "all fixtures" should {
     "have no errors and correct size" in {

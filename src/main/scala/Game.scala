@@ -7,7 +7,7 @@ import shogi.format.ParsedMove
 
 case class Game(
     situation: Situation,
-    moves: List[Move] = List.empty,
+    moves: Vector[Move] = Vector.empty,
     clock: Option[Clock] = None,
     plies: Int = 0,
     startedAtPly: Int = 0,
@@ -34,6 +34,11 @@ case class Game(
 
   def apply(parsedMove: ParsedMove): Validated[String, Game] =
     situation(parsedMove).map(applySituation(_))
+
+  // TODO: remove Usi compatibility wrapper
+  def usiMoves = moves
+  def apply(usi: shogi.format.usi.Usi): Validated[String, Game] =
+    apply(toParsedMove(usi, situation))
 
   def board = situation.board
 

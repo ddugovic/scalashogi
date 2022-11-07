@@ -3,7 +3,7 @@ package format.psn
 
 object Dumper {
 
-  def apply(game: Game): Seq[String] = {
+  def apply(game: Game): List[String] = {
     Replay
       .situations(game.situation, game.moves)
       .toList
@@ -11,7 +11,7 @@ object Dumper {
       .map { pair =>
         apply(pair.head, pair.tail.head.history.lastMove.get)
       }
-      .toSeq
+      .toList
   }
 
   def apply(situation: Situation, move: shogi.Move): String = move match {

@@ -22,10 +22,7 @@ case class Situation(
       case drop: PieceDrop => variant.applyDrop(this, drop)
     }
 
-  def apply(usi: Usi): Situation = apply(usi match {
-    case m: Usi.Move => m(board.pieces)
-    case d: Usi.Drop => d(color)
-  })
+  def apply(usi: Usi): Validated[String, Situation] = apply(toParsedMove(usi, this))
 
   def apply(parsedMove: ParsedMove): Validated[String, Situation] =
     parsedMove.toMove(this) map apply
@@ -44,6 +41,11 @@ case class Situation(
   def moveActorsOf(c: Color): List[MoveActor] = board.pieces.collect {
     case (pos, piece) if piece.color == c => MoveActor(piece, pos, this)
   }.toList
+
+  def moveDestinations: Map[Pos, List[Pos]] =
+    moveActorsOf(color).collect {
+      case actor if actor.destinations.nonEmpty => actor.pos -> actor.destinations
+    }.toMap
 
   lazy val hasMoveDestinations: Boolean =
     moveActorsOf(color).exists(_.destinations.nonEmpty)

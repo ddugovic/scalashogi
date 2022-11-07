@@ -78,7 +78,7 @@ object Usi {
       Usi.Drop(usiStr)
     else Usi.Move(usiStr)
 
-  def readList(moves: Seq[String]): Option[List[Usi]] =
+  def readList(moves: List[String]): Option[List[Usi]] =
     moves.toList.map(apply).sequence
 
   def readList(moves: String): Option[List[Usi]] =

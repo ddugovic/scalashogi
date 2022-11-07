@@ -13,6 +13,8 @@ case class PieceMove(
 
   def withPromotion(p: Boolean): PieceMove = copy(promotion = p)
 
+  def usi = shogi.format.usi.Usi.Move(dest, orig)
+
   def captureString = if (capture) "x" else "-"
 
   def promotionString = if (promotion) "+" else ""
@@ -42,6 +44,8 @@ case class PieceDrop(
     pos: Pos
 ) extends Move {
   def role = piece.role
+
+  def usi = shogi.format.usi.Usi.Drop(role, pos)
 
   override def toString = s"${piece.role}*${pos}"
 }

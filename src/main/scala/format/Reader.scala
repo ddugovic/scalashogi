@@ -29,11 +29,18 @@ object Reader {
   ): Result =
     makeReplayFromParsedMove(makeGame(tags), parsedMoves)
 
+  // TODO: remove backward compatibility code
+  def fromUsi(
+      moves: Iterable[shogi.Move],
+      tags: Tags
+  ): Result =
+    makeReplayFromUsis(makeGame(tags), moves)
+
   private def makeReplayFromParsedMove(game: Game, parsedMoves: Iterable[ParsedMove]): Result =
     parsedMoves.foldLeft[Result](Result.Complete(Replay(game))) {
-      case (Result.Complete(replay), usi) =>
+      case (Result.Complete(replay), move) =>
         replay
-          .state(usi)
+          .state(move)
           .fold(
             err => Result.Incomplete(replay, err),
             situation => Result.Complete(Replay(game, situation))
@@ -50,6 +57,13 @@ object Reader {
             err => Result.Incomplete(replay, err),
             situation => Result.Complete(Replay(game, situation))
           )
+      case (r: Result.Incomplete, _) => r
+    }
+
+  private def makeReplayFromUsis(game: Game, moves: Iterable[shogi.Move]): Result =
+    moves.foldLeft[Result](Result.Complete(Replay(game))) {
+      case (Result.Complete(replay), move: shogi.Move) =>
+        Result.Complete(Replay(game, replay.state(move)))
       case (r: Result.Incomplete, _) => r
     }
 
@@ -88,7 +102,7 @@ object Reader {
       case (Result.Complete(replay), san) =>
         san(replay.state.situation).fold(
           err => Result.Incomplete(replay, err),
-          move => Result.Complete(replay addMove move)
+          move => Result.Complete(replay(move))
         )
       case (r: Result.Incomplete, _) => r
     }

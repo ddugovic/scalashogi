@@ -8,7 +8,9 @@ class SituationReplayTest extends ShogiTest {
   "all 500 fixtures" should {
     "have no errors and correct size" in {
       usis forall { u =>
-        Replay.situations(u, None, shogi.variant.Standard).size must_== 1 + u.size
+        Replay.situations(u, None, shogi.variant.Standard) must beValid.like { case g =>
+          g.tail.size must_== u.size
+        }
       }
     }
   }

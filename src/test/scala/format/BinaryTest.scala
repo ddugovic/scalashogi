@@ -10,8 +10,7 @@ class BinaryTest extends ShogiTest {
 
   import BinaryTestUtils._
 
-  val empty     = makeEmptySituation
-  val situation = makeSituation
+  val empty = makeEmptySituation
 
   // isomorphic test (encode and decode trusted moves)
   def encodeThenDecodeMoves(situation: Situation, moves: Vector[shogi.Move]) = {
@@ -74,10 +73,11 @@ class BinaryTest extends ShogiTest {
     }
     "write many moves" in {
       "all games" in {
-        forall(format.usi.Fixtures.prod500standard) { usisStr =>
-          val usis             = shogi.format.usi.Usi.readList(usisStr).get
-          val moves: Seq[Move] = Replay(situation, usis)
-          shogi.format.usi.Binary.encodeMoves(usis, situation.variant) must_== Binary.encodeMoves(
+        val situation = makeSituation
+        forall(usi.Fixtures.prod500standard) { usisStr =>
+          val usis: List[usi.Usi] = usi.Usi.readList(usisStr).get
+          val moves: List[Move]   = replayTrustedUsis(situation, usis)
+          usi.Binary.encodeMoves(usis, situation.variant) must_== Binary.encodeMoves(
             moves,
             situation.variant
           )

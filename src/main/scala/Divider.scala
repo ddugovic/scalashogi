@@ -28,7 +28,7 @@ final case class Found(index: Int)                                              
 
 object Divider {
 
-  def apply(sits: Seq[Situation]): Division = {
+  def apply(sits: List[Situation]): Division = {
 
     val indexedSits = sits.zipWithIndex
 

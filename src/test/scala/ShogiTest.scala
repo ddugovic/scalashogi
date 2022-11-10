@@ -19,14 +19,6 @@ trait ShogiTest extends Specification with ValidatedMatchers {
       def as(color: Color): Situation = ((Visual parse str).get).copy(color = color)
     }
 
-  implicit def replayTrustedUsis(situation: Situation, usis: List[format.usi.Usi]): List[Move] =
-    Replay
-      .situations(usis, situation)
-      .map { _.tail.map { _.history.lastMove.get } }
-      .toOption
-      .get
-      .toList
-
   implicit def parsedMove(before: Situation, after: Situation): ParsedMove =
     after.history.lastMove.get match {
       case m: PieceMove => format.KifMove(m.dest, m.orig, before.board.pieces(m.orig).role, m.promotion)

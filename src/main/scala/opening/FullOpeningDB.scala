@@ -3,6 +3,7 @@ package opening
 
 import cats.syntax.option._
 
+import shogi.variant.{ Standard, Variant }
 import shogi.format.forsyth.Sfen
 
 object FullOpeningDB {
@@ -19,24 +20,24 @@ object FullOpeningDB {
 
   // assumes standard initial SFEN and variant
   def search(
-      moves: Seq[Move],
-      initialSfen: Option[Sfen],
-      variant: shogi.variant.Variant
+      usis: Seq[shogi.format.usi.Usi],
+      initialSfen: Option[Sfen] = None,
+      variant: Variant = Standard
   ): Option[FullOpening.AtPly] =
-    Replay
+    shogi.Replay
       .situations(
-        moves.take(SEARCH_MAX_PLIES),
+        usis.take(SEARCH_MAX_PLIES),
         initialSfen,
         variant
       )
-      .zipWithIndex
-      .tail
-      .reverse
-      .foldLeft[Option[FullOpening.AtPly]](None) {
-        case (None, (situation, ply)) =>
-          val sfen = situation.toSfen.truncate
-          bySfen get sfen.value map (_ atPly ply)
-        case (found, _) => found
+      .toOption
+      .flatMap {
+        _.zipWithIndex.tail.reverse.foldLeft[Option[FullOpening.AtPly]](None) {
+          case (None, (situation, ply)) =>
+            val sfen = situation.toSfen.truncate
+            bySfen get sfen.value map (_ atPly ply)
+          case (found, _) => found
+        }
       }
 
   def searchInSfens(sfens: Seq[Sfen]): Option[FullOpening] =

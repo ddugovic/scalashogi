@@ -1,8 +1,8 @@
 package shogi
-package format
-package usi
+package format.usi
 
 import cats.implicits._
+import shogi.variant.Variant
 
 sealed trait Usi {
 
@@ -14,6 +14,57 @@ sealed trait Usi {
 }
 
 object Usi {
+
+  // https://stackoverflow.com/a/39072117
+  case class Moves(val underlying: Vector[shogi.Move]) {
+    implicit def apply: Vector[shogi.Move] = underlying
+    implicit def toList: List[shogi.Move]  = underlying.toList
+    implicit def usiMoves: Vector[Usi]     = underlying map toUsiMove
+    implicit def usiMoveList: List[Usi]    = usiMoves.toList
+  }
+  implicit def apply(moves: Vector[shogi.Move]): Moves   = Moves(moves)
+  implicit def toMoves(moves: Moves): Vector[shogi.Move] = moves.apply
+
+  object Moves {
+
+    def apply(usi: Usi, situation: Situation): Moves = apply(List(usi), situation)
+
+    def apply(usis: List[Usi], situation: Situation): Moves = Moves(
+      Replay
+        .situations(usis, situation)
+        .map { _.tail.map { _.history.lastMove.get } }
+        .toOption
+        .get
+        .toVector
+    )
+
+    def apply(usis: List[Usi], variant: Variant): Moves = Moves(
+      Replay
+        .situations(usis, None, variant)
+        .map { _.tail.map { _.history.lastMove.get } }
+        .toOption
+        .get
+        .toVector
+    )
+
+    def apply(usis: Seq[Usi], variant: Variant): Moves = Moves(
+      Replay
+        .situations(usis, None, variant)
+        .map { _.tail.map { _.history.lastMove.get } }
+        .toOption
+        .get
+        .toVector
+    )
+
+    def apply(usis: Vector[Usi], variant: Variant): Moves = Moves(
+      Replay
+        .situations(usis, None, variant)
+        .map { _.tail.map { _.history.lastMove.get } }
+        .toOption
+        .get
+        .toVector
+    )
+  }
 
   case class Move(
       orig: Pos,

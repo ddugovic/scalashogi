@@ -13,7 +13,7 @@ case class PieceMove(
 
   def withPromotion(p: Boolean): PieceMove = copy(promotion = p)
 
-  def usi = shogi.format.usi.Usi.Move(dest, orig)
+  def usi = shogi.format.usi.Usi.Move(orig, dest)
 
   def captureString = if (capture) "x" else "-"
 

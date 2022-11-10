@@ -36,7 +36,7 @@ case class Game(
     situation(parsedMove).map(applySituation(_))
 
   // TODO: remove Usi compatibility wrapper
-  def usiMoves = moves
+  def usiMoves: shogi.format.usi.Usi.Moves = shogi.format.usi.Usi.Moves(moves)
   def apply(usi: shogi.format.usi.Usi): Validated[String, Game] =
     apply(toParsedMove(usi, situation))
 
@@ -73,6 +73,16 @@ case class Game(
 }
 
 object Game {
+  def apply(
+      situation: Situation,
+      moves: shogi.format.usi.Usi.Moves,
+      clock: Option[Clock],
+      plies: Int,
+      startedAtPly: Int,
+      startedAtMove: Int
+  ): Game =
+    Game(situation, moves, clock, plies, startedAtPly, startedAtMove)
+
   def apply(situation: Situation): Game =
     new Game(situation)
 

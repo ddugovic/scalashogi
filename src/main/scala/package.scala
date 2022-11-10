@@ -29,7 +29,7 @@ package object shogi extends scalalib.Common with scalalib.OrnicarOption with sc
   }
   implicit def toMove(situation: Situation, usi: Usi): Move = toMove(usi, situation)
   implicit def toUsiMove(move: Move): Usi = move match {
-    case m: PieceMove => Usi.Move(m.dest, m.orig, m.promotion)
+    case m: PieceMove => Usi.Move(m.orig, m.dest, m.promotion)
     case d: PieceDrop => Usi.Drop(d.role, d.pos)
   }
   implicit def toMove(parsedMove: ParsedMove, situation: Situation): Validated[String, Move] =

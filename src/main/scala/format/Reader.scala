@@ -31,10 +31,10 @@ object Reader {
 
   // TODO: remove backward compatibility code
   def fromUsi(
-      moves: Iterable[shogi.Move],
+      usis: Iterable[shogi.Move],
       tags: Tags
   ): Result =
-    makeReplayFromUsis(makeGame(tags), moves)
+    makeReplayFromUsis(makeGame(tags), usis)
 
   private def makeReplayFromParsedMove(game: Game, parsedMoves: Iterable[ParsedMove]): Result =
     parsedMoves.foldLeft[Result](Result.Complete(Replay(game))) {

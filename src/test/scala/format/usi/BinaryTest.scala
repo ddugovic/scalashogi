@@ -9,9 +9,21 @@ class BinaryTest extends ShogiTest {
 
   import BinaryTestUtils._
 
+  val empty = makeEmptySituation
+
   def compareStrAndBin(usisStr: String) = {
-    val bin = Binary.encodeMoves(Usi.readList(usisStr).get, Standard).toVector
-    Binary.decodeMoves(bin, Standard, 600).map(_.usi).mkString(" ") must_== usisStr
+    val situation        = makeSituation
+    val usis: List[Usi]  = Usi.readList(usisStr).get
+    val moves: Usi.Moves = Usi.Moves(usis, situation)
+    val bin              = Binary.encodeMoves(moves, situation.variant).toVector
+    Binary.decodeMoves(bin, situation.variant, 600).map(_.usi).mkString(" ") must_== usisStr
+  }
+
+  def compareStrAndBin(usisStr: String, situation: Situation) = {
+    val usis: List[Usi]  = Usi.readList(usisStr).get
+    val moves: Usi.Moves = Usi.Moves(usis, situation)
+    val bin              = Binary.encodeMoves(moves, situation.variant).toVector
+    Binary.decodeMove(bin, situation).map(_.usi).mkString(" ") must_== usisStr
   }
 
   "binary encoding" should {
@@ -58,50 +70,62 @@ class BinaryTest extends ShogiTest {
     "write many moves" in {
       "all games" in {
         forall(format.usi.Fixtures.prod500standard) { usisStr =>
-          val bin = Binary.encodeMoves(Usi.readList(usisStr).get, Standard).toList
+          val usis: List[Usi]  = Usi.readList(usisStr).get
+          val moves: Usi.Moves = Usi.Moves(usis, Standard)
+          val bin              = Binary.encodeMoves(moves, Standard).toList
           bin.size must be_<=(usisStr.size)
         }
       }
     }
-    "read single move" in {
+    "read single legal move" in {
+      val situation = makeSituation
       "simple move" in {
-        decodeMove("00000000,00001001") must_== "1a1b"
-        decodeMove("00001001,00000000") must_== "1b1a"
-        decodeMove("00000000,00000001") must_== "1a2a"
-        decodeMove("01000111,01010000") must_== "9h9i"
-        decodeMove("00111100,00110011") must_== "7g7f"
+        decodeMove("00000000,00001001", situation) must_== "1a1b"
+        decodeMove("00000000,00000001", situation) must_== "1a2a"
+        decodeMove("01010000,01000111", situation) must_== "9i9h"
+        decodeMove("00111100,00110011", situation) must_== "7g7f"
       }
       "simple move with promotion" in {
-        decodeMove("01000110,10001010") must_== "8h2b+"
-        decodeMove("00000000,11010000") must_== "1a9i+"
+        decodeMove("01000110,10001010", situation) must_== "8h2b+"
+        decodeMove("00000000,11010000", situation) must_== "1a9i+"
       }
-      "drop" in {
-        decodeMove("10000011,00011101") must_== "N*3d"
-        decodeMove("10000111,01010000") must_== "R*9i"
+      "knight drop" in {
+        val situation = setup(empty, Piece(Sente, Knight))
+        decodeMove("10000011,00011101", situation) must_== "N*3d"
+      }
+      "rook drop" in {
+        val situation = setup(empty, Piece(Sente, Rook))
+        decodeMove("10000111,01010000", situation) must_== "R*9i"
       }
     }
     "be isomorphic" in {
-      "for one" in {
+      "for one game" in {
         compareStrAndBin(format.usi.Fixtures.prod500standard.head)
       }
-      "for all" in {
+      "for all games" in {
         forall(format.usi.Fixtures.prod500standard)(compareStrAndBin)
       }
     }
-    "for all move combinations" in {
+    "for standard moves" in {
       val allMoves = for {
         orig <- Pos.all
         dest <- Pos.all
-      } yield Usi.Move(orig, dest, true)
-      forall(allMoves.map(_.usiKeys))(compareStrAndBin)
-      forall(allMoves.map(_.usi))(compareStrAndBin)
+      } yield Usi.Move(orig, dest, false)
+      forall(allMoves) { move =>
+        val situation = setup(empty, Piece(Sente, King), move.orig)
+        compareStrAndBin(move.usiKeys, situation)
+        compareStrAndBin(move.usi, situation)
+      }
     }
-    "for all drop combinations" in {
+    "for standard drops" in {
       val allDrops = for {
-        role <- Role.all
+        role <- Standard.handRoles
         pos  <- Pos.all
       } yield Usi.Drop(role, pos)
-      forall(allDrops.map(_.usi))(compareStrAndBin)
+      forall(allDrops) { drop =>
+        val situation = setup(empty, Piece(Sente, drop.role))
+        compareStrAndBin(drop.usi, situation)
+      }
     }
   }
 
@@ -109,16 +133,24 @@ class BinaryTest extends ShogiTest {
 
 object BinaryTestUtils {
 
+  def setup(empty: Situation, piece: Piece): Situation =
+    empty.withHands(empty.hands.store(piece, 1))
+
+  def setup(empty: Situation, piece: Piece, pos: Pos): Situation =
+    setup(empty, piece) apply PieceDrop(piece, pos)
+
   def showByte(b: Byte): String =
     "%08d" format {
       b & 0xff
     }.toBinaryString.toInt
 
-  def encodeMove(m: String, variant: Variant = Standard): String =
-    Binary.encodeMoves(List(Usi(m).get), variant) map showByte mkString ","
+  def encodeMove(m: String, variant: Variant = Standard): String = {
+    val usis: List[Usi] = Usi.readList(m).get
+    Binary.encodeMoves(usis, variant) map showByte mkString ","
+  }
 
-  def decodeMove(m: String, variant: Variant = Standard): String =
-    decodeMoves(m, variant).head
+  def decodeMove(m: String, situation: Situation): String =
+    Binary.decodeMove(m.split(',').toList.map(parseBinary), situation).head.usi
 
   def decodeMoves(m: String, variant: Variant = Standard): Seq[String] =
     Binary.decodeMoves(m.split(',').toList.map(parseBinary), variant, 600).map(_.usi)

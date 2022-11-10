@@ -5,11 +5,17 @@ import shogi.variant.Variant
 
 object Binary {
 
-  def decodeMoves(bs: Seq[Byte], variant: Variant, nb: Int): Vector[Usi] =
-    Reader.decode(bs, variant, nb)
+  def decodeMove(bs: Seq[Byte], situation: Situation): Usi.Moves =
+    Usi.Moves(Reader.decode(bs, situation.variant, 1).head, situation)
 
-  def encodeMoves(ms: Seq[Usi], variant: Variant): Array[Byte] =
-    Writer.encode(ms, variant)
+  def decodeMoves(bs: Seq[Byte], variant: shogi.variant.Variant, nb: Int): Usi.Moves =
+    Usi.Moves(Reader.decode(bs, variant, nb), variant)
+
+  def encodeMoves(usis: List[Usi], variant: Variant): Array[Byte] =
+    Writer.encode(usis, variant)
+
+  def encodeMoves(moves: Usi.Moves, variant: Variant): Array[Byte] =
+    Writer.encode(moves, variant)
 
   private object Encoding {
     val roleToInt: Map[Role, Int] = Map(
@@ -75,13 +81,22 @@ object Binary {
 
   private object Writer {
 
-    def encode(usis: Seq[Usi], variant: Variant): Array[Byte] =
+    def encode(usis: List[Usi], variant: Variant): Array[Byte] =
       usis.flatMap(encode(_, variant)).toArray
+
+    def encode(moves: Usi.Moves, variant: Variant): Array[Byte] =
+      moves.flatMap(encode(_, variant)).toArray
 
     private def encode(usi: Usi, variant: Variant): Seq[Byte] =
       usi match {
         case Usi.Move(orig, dest, prom) => encodeMove(orig, dest, prom, variant)
         case Usi.Drop(role, pos)        => encodeDrop(role, pos, variant)
+      }
+
+    private def encode(move: shogi.Move, variant: Variant): Seq[Byte] =
+      move match {
+        case PieceMove(_, orig, dest, _, prom) => encodeMove(orig, dest, prom, variant)
+        case PieceDrop(Piece(_, role), pos)    => encodeDrop(role, pos, variant)
       }
 
     private def encodeMove(orig: Pos, dest: Pos, prom: Boolean, variant: Variant): Seq[Byte] =

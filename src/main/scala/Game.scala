@@ -75,13 +75,13 @@ case class Game(
 object Game {
   def apply(
       situation: Situation,
-      moves: shogi.format.usi.Usi.Moves,
+      usiMoves: shogi.format.usi.Usi.Moves,
       clock: Option[Clock],
       plies: Int,
       startedAtPly: Int,
       startedAtMove: Int
   ): Game =
-    Game(situation, moves, clock, plies, startedAtPly, startedAtMove)
+    Game(situation, usiMoves, clock, plies, startedAtPly, startedAtMove)
 
   def apply(situation: Situation): Game =
     new Game(situation)

@@ -1,8 +1,6 @@
 package shogi
 package format
 
-import shogi.format.usi.Usi
-
 trait Notation {
 
   def moves: List[NotationMove]
@@ -40,7 +38,7 @@ object Initial {
 
 case class NotationMove(
     moveNumber: Int,
-    usiWithRole: Usi.WithRole,
+    move: shogi.Move,
     comments: List[String] = Nil,
     glyphs: Glyphs = Glyphs.empty,
     result: Option[String] = None,

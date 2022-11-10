@@ -5,7 +5,6 @@ package csa
 import cats.syntax.option._
 
 import shogi.variant.Standard
-import shogi.format.usi.Usi
 
 case class Csa(
     tags: Tags,
@@ -51,19 +50,19 @@ case class Csa(
 object Csa {
 
   def renderNotationMove(cur: NotationMove, turn: Option[Color]) = {
-    val csaMove     = renderCsaMove(cur.usiWithRole, turn)
+    val csaMove     = renderCsaMove(cur.move, turn)
     val timeStr     = clockString(cur) | ""
     val commentsStr = cur.comments.map { text => s"\n'${fixComment(text)}" }.mkString("")
     val resultStr   = cur.result.fold("")(t => s"\n$t")
     s"$csaMove$timeStr$commentsStr$resultStr"
   }
 
-  def renderCsaMove(usiWithRole: Usi.WithRole, turn: Option[Color]) =
-    usiWithRole.usi match {
-      case Usi.Drop(role, pos) =>
-        s"${turn.fold("")(_.fold("+", "-"))}00${pos.numberKey}${role.csa}"
-      case Usi.Move(orig, dest, prom) => {
-        val finalRole = Standard.promote(usiWithRole.role).filter(_ => prom) | usiWithRole.role
+  def renderCsaMove(move: shogi.Move, turn: Option[Color]) =
+    move match {
+      case PieceDrop(piece, pos) =>
+        s"${turn.fold("")(_.fold("+", "-"))}00${pos.numberKey}${piece.role.csa}"
+      case PieceMove(piece, orig, dest, _, prom) => {
+        val finalRole = Standard.promote(piece.role).filter(_ => prom) | piece.role
         s"${turn.fold("")(_.fold("+", "-"))}${orig.numberKey}${dest.numberKey}${finalRole.csa}"
       }
     }

@@ -5,7 +5,6 @@ package kif
 import cats.syntax.option._
 
 import shogi.variant._
-import shogi.format.usi.Usi
 import shogi.format.forsyth.Sfen
 
 case class Kif(
@@ -23,7 +22,7 @@ case class Kif(
   def renderMovesAndVariations(moveline: List[NotationMove]): String = {
     val mainline = moveline
       .foldLeft[(List[String], Option[Pos])]((Nil, None)) { case ((acc, lastDest), cur) =>
-        ((Kif.renderNotationMove(cur, lastDest) :: acc), cur.usiWithRole.usi.positions.lastOption)
+        ((Kif.renderNotationMove(cur, lastDest) :: acc), cur.move.positions.lastOption)
       }
       ._1
       .reverse mkString "\n"
@@ -52,21 +51,21 @@ object Kif {
 
   def renderNotationMove(cur: NotationMove, lastDest: Option[Pos]): String = {
     val resultStr   = cur.result.fold("")(r => s"\n${moveNumberOffset(cur.moveNumber + 1)}$offset$r")
-    val kifMove     = renderKifMove(cur.usiWithRole, lastDest)
+    val kifMove     = renderKifMove(cur.move, lastDest)
     val timeStr     = clockString(cur) | ""
     val glyphsNames = cur.glyphs.toList.map(_.name)
     val commentsStr = (glyphsNames ::: cur.comments).map { text => s"\n* ${fixComment(text)}" }.mkString("")
     s"${moveNumberOffset(cur.moveNumber)}$offset$kifMove$timeStr$commentsStr$resultStr"
   }
 
-  def renderKifMove(usiWithRole: Usi.WithRole, lastDest: Option[Pos]): String =
-    usiWithRole.usi match {
-      case Usi.Drop(role, pos) =>
-        s"${makeDestSquare(pos)}${role.kif.head}打"
-      case Usi.Move(orig, dest, prom) => {
+  def renderKifMove(move: shogi.Move, lastDest: Option[Pos]): String =
+    move match {
+      case PieceDrop(piece, pos) =>
+        s"${makeDestSquare(pos)}${piece.role.kif.head}打"
+      case PieceMove(piece, orig, dest, _, prom) => {
         val destStr = if (lastDest.fold(false)(_ == dest)) "同　" else makeDestSquare(dest)
         val promStr = if (prom) "成" else ""
-        val roleStr = usiWithRole.role.kif.head
+        val roleStr = piece.role.kif.head
         s"$destStr$roleStr$promStr(${orig.numberKey})"
       }
     }

@@ -1,6 +1,6 @@
 package shogi
 
-import format.ParsedMove
+import format.ParsedMoves
 
 import format.usi.Usi
 
@@ -8,12 +8,12 @@ class ReplayPerfTest extends ShogiTest {
 
   // args(skipAll = true)
 
-  val nb                                  = 100
-  val usis: List[List[Usi]]               = format.usi.Fixtures.prod500standard.map(Usi.readList(_).get)
-  val parsedMoves: List[List[ParsedMove]] = usis map parseTrustedUsis
-  val iterations                          = 10
+  val nb                             = 100
+  val usis: List[List[Usi]]          = format.usi.Fixtures.prod500standard.map(Usi.readList(_).get)
+  val parsedMoves: List[ParsedMoves] = usis map parseTrustedUsis
+  val iterations                     = 10
 
-  def runOne(parsedMoves: List[ParsedMove]) =
+  def runOne(parsedMoves: ParsedMoves) =
     Replay.gamesWhileValid(parsedMoves, None, shogi.variant.Standard)
   def run() = { parsedMoves foreach runOne }
 

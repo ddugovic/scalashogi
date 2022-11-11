@@ -10,10 +10,15 @@ case class ParsedNotation(
     parsedMoves: ParsedMoves
 )
 
-case class ParsedMoves(value: List[ParsedMove]) extends AnyVal
+// TODO: rename value -> underlying to follow common convention
+case class ParsedMoves(value: List[ParsedMove]) {
+  def toList: List[ParsedMove] = value
+}
 
 object ParsedMoves {
-  val empty = ParsedMoves(Nil)
+  val empty                                                       = ParsedMoves(List.empty)
+  implicit def apply(value: List[ParsedMove]): ParsedMoves        = new ParsedMoves(value)
+  implicit def toList(parsedMoves: ParsedMoves): List[ParsedMove] = parsedMoves.toList
 }
 
 sealed trait ParsedMove {

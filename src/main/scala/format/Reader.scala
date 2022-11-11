@@ -3,7 +3,9 @@ package format
 
 import cats.data.Validated
 
+import shogi.format.ParsedMove
 import shogi.format.psn._
+import shogi.format.usi.Usi
 
 object Reader {
 
@@ -20,36 +22,23 @@ object Reader {
     }
   }
 
-  def fromParsedNotation(parsed: ParsedNotation, op: ParsedMoves => ParsedMoves): Result =
+  def fromParsedNotation(parsed: ParsedNotation, op: List[ParsedMove] => List[ParsedMove]): Result =
     makeReplayFromParsedMoves(makeGame(parsed.tags), op(parsed.parsedMoves))
 
-  def fromParsedMove(
-      parsedMoves: Iterable[ParsedMove],
+  def fromParsedMoves(
+      parsedMoves: List[ParsedMove],
       tags: Tags
   ): Result =
-    makeReplayFromParsedMove(makeGame(tags), parsedMoves)
+    makeReplayFromParsedMoves(makeGame(tags), parsedMoves)
 
-  // TODO: remove backward compatibility code
   def fromUsi(
-      usis: Iterable[shogi.Move],
+      usis: Iterable[Usi],
       tags: Tags
   ): Result =
     makeReplayFromUsis(makeGame(tags), usis)
 
-  private def makeReplayFromParsedMove(game: Game, parsedMoves: Iterable[ParsedMove]): Result =
+  private def makeReplayFromParsedMoves(game: Game, parsedMoves: List[ParsedMove]): Result =
     parsedMoves.foldLeft[Result](Result.Complete(Replay(game))) {
-      case (Result.Complete(replay), move) =>
-        replay
-          .state(move)
-          .fold(
-            err => Result.Incomplete(replay, err),
-            situation => Result.Complete(Replay(game, situation))
-          )
-      case (r: Result.Incomplete, _) => r
-    }
-
-  private def makeReplayFromParsedMoves(game: Game, parsedMoves: ParsedMoves): Result =
-    parsedMoves.value.foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), parsedMove) =>
         replay
           .state(parsedMove)
@@ -60,10 +49,15 @@ object Reader {
       case (r: Result.Incomplete, _) => r
     }
 
-  private def makeReplayFromUsis(game: Game, moves: Iterable[shogi.Move]): Result =
+  private def makeReplayFromUsis(game: Game, moves: Iterable[Usi]): Result =
     moves.foldLeft[Result](Result.Complete(Replay(game))) {
-      case (Result.Complete(replay), move: shogi.Move) =>
-        Result.Complete(Replay(game, replay.state(move)))
+      case (Result.Complete(replay), move) =>
+        replay
+          .state(move)
+          .fold(
+            err => Result.Incomplete(replay, err),
+            situation => Result.Complete(Replay(game, situation))
+          )
       case (r: Result.Incomplete, _) => r
     }
 

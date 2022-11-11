@@ -7,6 +7,7 @@ import cats.implicits._
 
 import shogi.format.{ ParsedMove, Reader, Tag, Tags }
 import shogi.format.forsyth.Sfen
+import shogi.format.usi.Usi;
 
 case class Replay(setup: Game, state: Game) {
   def apply(game: Game) = copy(state = game)
@@ -98,7 +99,7 @@ object Replay {
   ): (NonEmptyList[Game], Option[String]) = gamesWhileValid(parsedMoves.toList, initialSfen, variant)
 
   def situations(
-      usis: List[shogi.format.usi.Usi],
+      usis: List[Usi],
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): Validated[String, NonEmptyList[Situation]] = {
@@ -107,7 +108,7 @@ object Replay {
   }
 
   def situations(
-      usis: List[shogi.format.usi.Usi],
+      usis: List[Usi],
       situation: Situation
   ): Validated[String, NonEmptyList[Situation]] =
     usis.foldLeft[Validated[String, NonEmptyList[Situation]]](valid(NonEmptyList.one(situation))) {
@@ -120,13 +121,13 @@ object Replay {
     } map (_.reverse)
 
   def situations(
-      usis: Seq[shogi.format.usi.Usi],
+      usis: Seq[Usi],
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): Validated[String, NonEmptyList[Situation]] = situations(usis.toList, initialSfen, variant)
 
   def situations(
-      usis: Vector[shogi.format.usi.Usi],
+      usis: Vector[Usi],
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): Validated[String, NonEmptyList[Situation]] = situations(usis.toList, initialSfen, variant)
@@ -156,6 +157,13 @@ object Replay {
       situation: Situation,
       moves: Vector[Move]
   ): NonEmptyList[Situation] = situations(situation, moves.toList)
+
+  // TODO: remove backward compatibility code
+  def usiWithRoleWhilePossible(
+      usis: Usi.Moves,
+      initialSfen: Option[Sfen],
+      variant: shogi.variant.Variant
+  ): List[Move] = Usi.Moves(usis, initialSfen, variant) toList
 
   def plyAtSfen(
       parsedMoves: List[ParsedMove],

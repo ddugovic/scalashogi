@@ -2,6 +2,7 @@ package shogi
 package format.usi
 
 import cats.implicits._
+import shogi.format.forsyth.Sfen
 import shogi.variant.Variant
 
 sealed trait Usi {
@@ -27,6 +28,10 @@ object Usi {
 
   object Moves {
 
+    // TODO: remove backward compatibility code
+    def apply(moves: Moves, initialSfen: Option[Sfen], variant: Variant): Moves =
+      apply(moves.usiMoveList, initialSfen, variant)
+
     def apply(usi: Usi, situation: Situation): Moves = apply(List(usi), situation)
 
     def apply(usis: List[Usi], situation: Situation): Moves = Moves(
@@ -38,27 +43,33 @@ object Usi {
         .toVector
     )
 
-    def apply(usis: List[Usi], variant: Variant): Moves = Moves(
+    def apply(usis: List[Usi], variant: Variant): Moves = apply(usis, None, variant)
+
+    def apply(usis: List[Usi], initialSfen: Option[Sfen], variant: Variant): Moves = Moves(
       Replay
-        .situations(usis, None, variant)
+        .situations(usis, initialSfen, variant)
         .map { _.tail.map { _.history.lastMove.get } }
         .toOption
         .get
         .toVector
     )
 
-    def apply(usis: Seq[Usi], variant: Variant): Moves = Moves(
+    def apply(usis: Seq[Usi], variant: Variant): Moves = apply(usis, None, variant)
+
+    def apply(usis: Seq[Usi], initialSfen: Option[Sfen], variant: Variant): Moves = Moves(
       Replay
-        .situations(usis, None, variant)
+        .situations(usis, initialSfen, variant)
         .map { _.tail.map { _.history.lastMove.get } }
         .toOption
         .get
         .toVector
     )
 
-    def apply(usis: Vector[Usi], variant: Variant): Moves = Moves(
+    def apply(usis: Vector[Usi], variant: Variant): Moves = apply(usis, None, variant)
+
+    def apply(usis: Vector[Usi], initialSfen: Option[Sfen], variant: Variant): Moves = Moves(
       Replay
-        .situations(usis, None, variant)
+        .situations(usis, initialSfen, variant)
         .map { _.tail.map { _.history.lastMove.get } }
         .toOption
         .get

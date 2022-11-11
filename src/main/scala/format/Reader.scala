@@ -5,7 +5,6 @@ import cats.data.Validated
 
 import shogi.format.ParsedMove
 import shogi.format.psn._
-import shogi.format.usi.Usi
 
 object Reader {
 
@@ -32,7 +31,7 @@ object Reader {
     makeReplayFromParsedMoves(makeGame(tags), parsedMoves)
 
   def fromUsi(
-      usis: Iterable[Usi],
+      usis: Iterable[shogi.Move],
       tags: Tags
   ): Result =
     makeReplayFromUsis(makeGame(tags), usis)
@@ -49,15 +48,10 @@ object Reader {
       case (r: Result.Incomplete, _) => r
     }
 
-  private def makeReplayFromUsis(game: Game, moves: Iterable[Usi]): Result =
+  private def makeReplayFromUsis(game: Game, moves: Iterable[shogi.Move]): Result =
     moves.foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), move) =>
-        replay
-          .state(move)
-          .fold(
-            err => Result.Incomplete(replay, err),
-            situation => Result.Complete(Replay(game, situation))
-          )
+        Result.Complete(Replay(game, replay.state(move)))
       case (r: Result.Incomplete, _) => r
     }
 

@@ -19,16 +19,10 @@ object Usi {
 
   // https://stackoverflow.com/a/39072117
   case class Moves(val underlying: Vector[shogi.Move]) {
-    implicit def toVector: Vector[shogi.Move] = underlying
-    implicit def toList: List[shogi.Move]     = underlying.toList
-    // TODO: remove parsedMoves and parsedMoveList
-    //implicit def parsedMoves: Vector[ParsedMove] = underlying map {
-    //  case m: PieceMove => KifMove(m.dest, m.orig, m.piece.role, m.promotion)
-    //  case d: PieceDrop => ParsedDrop(d.role, d.pos)
-    //}
-    //implicit def parsedMoveList: List[ParsedMove] = parsedMoves.toList
-    implicit def usiMoves: Vector[Usi]  = underlying map toUsiMove
-    implicit def usiMoveList: List[Usi] = usiMoves.toList
+    def toVector: Vector[shogi.Move] = underlying
+    def toList: List[shogi.Move]     = underlying.toList
+    def usiMoves: Vector[Usi]        = underlying map toUsiMove
+    def usiMoveList: List[Usi]       = usiMoves.toList
   }
   implicit def apply(moves: Vector[shogi.Move]): Moves    = new Moves(moves)
   implicit def toVector(moves: Moves): Vector[shogi.Move] = moves.toVector

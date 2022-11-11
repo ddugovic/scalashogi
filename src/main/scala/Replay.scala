@@ -19,12 +19,12 @@ object Replay {
   def apply(game: Game) = new Replay(game, game)
 
   def apply(
-      usis: List[shogi.format.usi.Usi],
+      moves: List[Move],
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): Reader.Result =
     Reader.fromUsi(
-      usis,
+      moves,
       Tags(
         List(
           initialSfen map { sfen =>

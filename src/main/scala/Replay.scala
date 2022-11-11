@@ -158,6 +158,23 @@ object Replay {
       moves: Vector[Move]
   ): NonEmptyList[Situation] = situations(situation, moves.toList)
 
+  // TODO: rename variable usis to moves
+  def situations(
+      usis: Usi.Moves,
+      initialSfen: Option[Sfen],
+      variant: shogi.variant.Variant
+  ): NonEmptyList[Situation] = {
+    val init = initialSfenToSituation(initialSfen, variant)
+    situations(init, usis)
+  }
+
+  def situations(
+      situation: Situation,
+      moves: Usi.Moves
+  ): NonEmptyList[Situation] = moves
+    .foldLeft[NonEmptyList[Situation]](NonEmptyList.one(situation)) { (acc, move) => acc.head(move) :: acc }
+    .reverse
+
   // TODO: remove backward compatibility code
   def usiWithRoleWhilePossible(
       usis: Usi.Moves,

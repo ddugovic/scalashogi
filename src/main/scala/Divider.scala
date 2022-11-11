@@ -28,6 +28,8 @@ final case class Found(index: Int)                                              
 
 object Divider {
 
+  def apply(sits: cats.data.NonEmptyList[Situation]): Division = apply(sits toList)
+
   def apply(sits: List[Situation]): Division = {
 
     val indexedSits = sits.zipWithIndex

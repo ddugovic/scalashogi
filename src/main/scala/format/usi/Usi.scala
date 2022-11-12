@@ -21,7 +21,7 @@ object Usi {
   case class Moves(val underlying: Vector[shogi.Move]) {
     def toVector: Vector[shogi.Move] = underlying
     def toList: List[shogi.Move]     = underlying.toList
-    def usiMoves: Vector[Usi]        = underlying map toUsiMove
+    def usiMoves: Vector[Usi]        = underlying map toUsi
     def usiMoveList: List[Usi]       = usiMoves.toList
   }
   implicit def apply(moves: Vector[shogi.Move]): Moves    = new Moves(moves)

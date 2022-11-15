@@ -15,27 +15,45 @@ sealed trait Usi {
 
 }
 
+// https://stackoverflow.com/a/39072117
+case class Usis(val underlying: List[Usi]) {
+  def toList: List[Usi]     = underlying
+  def toSeq: Seq[Usi]       = underlying.toSeq
+  def toVector: Vector[Usi] = underlying.toVector
+}
+
+object Usis {
+  implicit def apply(usis: List[Usi]): Usis   = new Usis(usis)
+  implicit def apply(usis: Seq[Usi]): Usis    = new Usis(usis.toList)
+  implicit def apply(usis: Vector[Usi]): Usis = new Usis(usis.toList)
+  implicit def toList(usis: Usis): List[Usi]  = usis.toList
+}
+
 object Usi {
 
   // https://stackoverflow.com/a/39072117
   case class Moves(val underlying: Vector[shogi.Move]) {
-    def toVector: Vector[shogi.Move] = underlying
     def toList: List[shogi.Move]     = underlying.toList
-    def usiMoves: Vector[Usi]        = underlying map toUsi
-    def usiMoveList: List[Usi]       = usiMoves.toList
+    def toSeq: Seq[shogi.Move]       = underlying.toSeq
+    def toVector: Vector[shogi.Move] = underlying
+    def toUsis: Usis                 = Usis(underlying map toUsi)
+    def toUsiList: List[Usi]         = toUsis.toList
   }
+  implicit def apply(moves: List[shogi.Move]): Moves      = new Moves(moves.toVector)
+  implicit def apply(moves: Seq[shogi.Move]): Moves       = new Moves(moves.toVector)
   implicit def apply(moves: Vector[shogi.Move]): Moves    = new Moves(moves)
+  implicit def toUsis(moves: Moves): Usis                 = moves.toUsis
   implicit def toVector(moves: Moves): Vector[shogi.Move] = moves.toVector
 
   object Moves {
 
     // TODO: remove backward compatibility code
     def apply(moves: Moves, initialSfen: Option[Sfen], variant: Variant): Moves =
-      apply(moves.usiMoveList, initialSfen, variant)
+      apply(moves.toUsis, initialSfen, variant)
 
-    def apply(usi: Usi, situation: Situation): Moves = apply(List(usi), situation)
+    def apply(usi: Usi, situation: Situation): Moves = apply(Usis(Vector(usi)), situation)
 
-    def apply(usis: List[Usi], situation: Situation): Moves = Moves(
+    def apply(usis: Usis, situation: Situation): Moves = Moves(
       Replay
         .situations(usis, situation)
         .map { _.tail.map { _.history.lastMove.get } }
@@ -44,31 +62,9 @@ object Usi {
         .toVector
     )
 
-    def apply(usis: List[Usi], variant: Variant): Moves = apply(usis, None, variant)
+    def apply(usis: Usis, variant: Variant): Moves = apply(usis, None, variant)
 
-    def apply(usis: List[Usi], initialSfen: Option[Sfen], variant: Variant): Moves = Moves(
-      Replay
-        .situations(usis, initialSfen, variant)
-        .map { _.tail.map { _.history.lastMove.get } }
-        .toOption
-        .get
-        .toVector
-    )
-
-    def apply(usis: Seq[Usi], variant: Variant): Moves = apply(usis, None, variant)
-
-    def apply(usis: Seq[Usi], initialSfen: Option[Sfen], variant: Variant): Moves = Moves(
-      Replay
-        .situations(usis, initialSfen, variant)
-        .map { _.tail.map { _.history.lastMove.get } }
-        .toOption
-        .get
-        .toVector
-    )
-
-    def apply(usis: Vector[Usi], variant: Variant): Moves = apply(usis, None, variant)
-
-    def apply(usis: Vector[Usi], initialSfen: Option[Sfen], variant: Variant): Moves = Moves(
+    def apply(usis: Usis, initialSfen: Option[Sfen], variant: Variant): Moves = Moves(
       Replay
         .situations(usis, initialSfen, variant)
         .map { _.tail.map { _.history.lastMove.get } }

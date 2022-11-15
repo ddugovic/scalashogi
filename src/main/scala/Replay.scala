@@ -77,7 +77,7 @@ object Replay {
       moves: shogi.format.usi.Usi.Moves,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
-  ): (NonEmptyList[Game], Option[String]) = gamesWhileValid(moves.usiMoveList, initialSfen, variant)
+  ): (NonEmptyList[Game], Option[String]) = gamesWhileValid(moves.toUsiList, initialSfen, variant)
 
   def gamesWhileValid(
       usis: List[shogi.format.usi.Usi],
@@ -105,7 +105,7 @@ object Replay {
   }
 
   def situations(
-      usis: List[shogi.format.usi.Usi],
+      usis: shogi.format.usi.Usis,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): Validated[String, NonEmptyList[Situation]] = {
@@ -125,18 +125,6 @@ object Replay {
           }
         }
     } map (_.reverse)
-
-  def situations(
-      usis: Seq[shogi.format.usi.Usi],
-      initialSfen: Option[Sfen],
-      variant: shogi.variant.Variant
-  ): Validated[String, NonEmptyList[Situation]] = situations(usis.toList, initialSfen, variant)
-
-  def situations(
-      usis: Vector[shogi.format.usi.Usi],
-      initialSfen: Option[Sfen],
-      variant: shogi.variant.Variant
-  ): Validated[String, NonEmptyList[Situation]] = situations(usis.toList, initialSfen, variant)
 
   def situations(
       moves: Seq[Move],

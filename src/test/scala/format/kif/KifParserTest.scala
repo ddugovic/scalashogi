@@ -30,7 +30,7 @@ class KifParserTest extends ShogiTest {
   "basic" should {
     "move" in {
       parser("☗７七金(78)") must beValid.like { case p =>
-        p.parsedMoves.value.headOption must beSome.like { case a: KifMove =>
+        p.parsedMoves.headOption must beSome.like { case a: KifMove =>
           a.dest === Pos.SQ7G
           a.orig === Pos.SQ7H
           a.role === Gold
@@ -40,7 +40,7 @@ class KifParserTest extends ShogiTest {
     }
     "drop" in {
       parser("７四歩打") must beValid.like { case p =>
-        p.parsedMoves.value.headOption must beSome.like { case d: ParsedDrop =>
+        p.parsedMoves.headOption must beSome.like { case d: ParsedDrop =>
           d.role must_== Pawn
           d.pos must_== Pos.SQ7D
         }
@@ -48,7 +48,7 @@ class KifParserTest extends ShogiTest {
     }
     "move with number" in {
       parser("1 ７七G(78)") must beValid.like { case p =>
-        p.parsedMoves.value.headOption must beSome.like { case a: KifMove =>
+        p.parsedMoves.headOption must beSome.like { case a: KifMove =>
           a.dest === Pos.SQ7G
           a.orig === Pos.SQ7H
           a.role === Gold
@@ -58,7 +58,7 @@ class KifParserTest extends ShogiTest {
     }
     "move with number and a dot" in {
       parser("42. ７7金(78)") must beValid.like { case p =>
-        p.parsedMoves.value.headOption must beSome.like { case a: KifMove =>
+        p.parsedMoves.headOption must beSome.like { case a: KifMove =>
           a.dest === Pos.SQ7G
           a.orig === Pos.SQ7H
           a.role === Gold
@@ -71,7 +71,7 @@ class KifParserTest extends ShogiTest {
       1 ７六歩(77) (0:12/0:0:12)
       2 ７六飛(77) (0:12/)
       """) must beValid.like { case p =>
-        p.parsedMoves.value.lastOption must beSome.like { case a: KifMove =>
+        p.parsedMoves.lastOption must beSome.like { case a: KifMove =>
           a.dest === Pos.SQ7F
           a.orig === Pos.SQ7G
           a.role === Rook
@@ -84,14 +84,14 @@ class KifParserTest extends ShogiTest {
   "promotion" should {
     "as a true" in {
       parser("3 ２二角成(88) ") must beValid.like { case a =>
-        a.parsedMoves.value.headOption must beSome.like { case move: KifMove =>
+        a.parsedMoves.headOption must beSome.like { case move: KifMove =>
           move.promotion must_== true
         }
       }
     }
     "as a false" in {
       parser("3 ２二角不成(88) ") must beValid.like { case a =>
-        a.parsedMoves.value.headOption must beSome.like { case move: KifMove =>
+        a.parsedMoves.headOption must beSome.like { case move: KifMove =>
           move.promotion must_== false
         }
       }
@@ -112,7 +112,7 @@ class KifParserTest extends ShogiTest {
       1 ７六歩(77) (0:12/0:0:12)
       2 同 飛(77) (0:12/0:0:12)
       """) must beValid.like { case p =>
-        p.parsedMoves.value.lastOption must beSome.like { case a: KifMove =>
+        p.parsedMoves.lastOption must beSome.like { case a: KifMove =>
           a.dest === Pos.SQ7F
           a.orig === Pos.SQ7G
           a.role === Rook
@@ -126,8 +126,8 @@ class KifParserTest extends ShogiTest {
       2 同 飛(72) (0:12/0:0:12)
       3 同 角(55) (0:12/0:0:12)
       """) must beValid.like { case p =>
-        p.parsedMoves.value must haveSize(3)
-        p.parsedMoves.value.lastOption must beSome.like { case a: KifMove =>
+        p.parsedMoves.toList must haveSize(3)
+        p.parsedMoves.lastOption must beSome.like { case a: KifMove =>
           a.dest === Pos.SQ7F
           a.orig === Pos.SQ5E
           a.role === Bishop

@@ -79,7 +79,7 @@ object KifParser {
         tags = createTags(preTags, situation, strMoves.size, terminationOption)
         parsedMoves <- objMoves(strMoves, situation.variant, variations)
         _ <-
-          if (kif.isEmpty || parsedMoves.value.nonEmpty || tags.knownTypes.value.nonEmpty)
+          if (kif.isEmpty || parsedMoves.nonEmpty || tags.knownTypes.value.nonEmpty)
             valid(true)
           else invalid("No moves, non-standard starting position or valid tags provided")
       } yield ParsedNotation(init, tags, parsedMoves)

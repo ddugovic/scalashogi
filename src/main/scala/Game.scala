@@ -8,7 +8,7 @@ import shogi.format.usi.{ Usi, Usis }
 
 case class Game(
     situation: Situation,
-    moves: Usi.Moves = Vector.empty,
+    moves: Usi.Moves = Usi.Moves(Vector.empty),
     clock: Option[Clock] = None,
     plies: Int = 0,
     startedAtPly: Int = 0,

@@ -169,12 +169,11 @@ object Replay {
     .foldLeft[NonEmptyList[Situation]](NonEmptyList.one(situation)) { (acc, move) => acc.head(move) :: acc }
     .reverse
 
-  // TODO: remove backward compatibility code
   def usiWithRoleWhilePossible(
-      usis: shogi.format.usi.Usi.Moves,
+      usis: shogi.format.usi.Usis,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
-  ): List[Move] = shogi.format.usi.Usi.Moves(usis, initialSfen, variant) toList
+  ): shogi.format.usi.Usi.Moves = shogi.format.usi.Usi.Moves(usis, initialSfen, variant)
 
   def plyAtSfen(
       parsedMoves: List[ParsedMove],

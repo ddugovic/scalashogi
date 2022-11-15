@@ -94,6 +94,8 @@ object Usi {
       PieceMove(pieces(orig), orig, dest, pieces.contains(dest), promotion)
 
     def apply(situation: Situation): shogi.Move = apply(situation.board.pieces)
+
+    override def toString: String = usi
   }
 
   object Move {
@@ -118,6 +120,8 @@ object Usi {
       PieceDrop(Piece(color, role), pos)
 
     def apply(situation: Situation): shogi.Move = apply(situation.color)
+
+    override def toString: String = usi
   }
 
   object Drop {
@@ -142,4 +146,6 @@ object Usi {
 
   def readList(moves: String): Option[List[Usi]] =
     readList(moves.split(' ').toList)
+
+  implicit def toString(usi: Usi): String = usi.toString
 }

@@ -1,6 +1,9 @@
 package shogi
 
+import shogi.format.usi.Usi
+
 sealed trait Move {
+  def usi: Usi
   def role: Role
   def positions: List[Pos]
 }
@@ -16,7 +19,7 @@ case class PieceMove(
 
   def withPromotion(p: Boolean): PieceMove = copy(promotion = p)
 
-  def usi: String = shogi.format.usi.Usi.Move(orig, dest).usi
+  def usi: Usi = Usi.Move(orig, dest, promotion)
 
   def role: Role = piece.role
 
@@ -54,7 +57,7 @@ case class PieceDrop(
 
   def positions: List[Pos] = List(pos)
 
-  def usi: String = shogi.format.usi.Usi.Drop(role, pos).usi
+  def usi: Usi = Usi.Drop(role, pos)
 
   override def toString = s"$role*$pos"
 }

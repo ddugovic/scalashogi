@@ -3,20 +3,21 @@ package format.usi
 
 import scala._
 
+import format.forsyth.Sfen
 import variant._
 
 class BinaryTest extends ShogiTest {
 
   import BinaryTestUtils._
 
-  val empty = makeEmptySituation
+  val empty     = makeEmptySituation
+  val situation = makeSituation
 
   def compareStrAndBin(usisStr: String) = {
-    val situation        = makeSituation
     val usis: List[Usi]  = Usi.readList(usisStr).get
     val moves: Usi.Moves = Usi.Moves(usis, situation)
     val bin              = Binary.encodeMoves(moves, situation.variant).toVector
-    Binary.decodeMoves(bin, situation.variant, 600).map(_.usi).mkString(" ") must_== usisStr
+    Binary.decodeMoves(bin, situation, 600).map(_.usi).mkString(" ") must_== usisStr
   }
 
   def compareStrAndBin(usisStr: String, situation: Situation) = {
@@ -33,52 +34,59 @@ class BinaryTest extends ShogiTest {
     }
     "write single move" in {
       "simple move" in {
-        encodeMove("1a1b") must_== "00000000,00001001"
-        encodeMove("1b1a") must_== "00001001,00000000"
-        encodeMove("1a2a") must_== "00000000,00000001"
-        encodeMove("7g7f") must_== "00111100,00110011"
-        encodeMove("8h2b") must_== "01000110,00001010"
-        encodeMove("1i1h") must_== "01001000,00111111"
-        encodeMove("1i2i") must_== "01001000,01001001"
-        encodeMove("9a8a") must_== "00001000,00000111"
-        encodeMove("9a9b") must_== "00001000,00010001"
-        encodeMove("9i8i") must_== "01010000,01001111"
-        encodeMove("9h9i") must_== "01000111,01010000"
-        encodeMove("1a9i") must_== "00000000,01010000"
+        val sfen = Sfen(
+          "KKKKKKKKK/KKKKKKKKK/KKKKKKKKK/KKKKKKKKK/KKKKKKKKK/KKKKKKKKK/KKKKKKKKK/KKKKKKKKK/KKKKKKKKK b - 1"
+        )
+        val situation = sfen.toSituation(Standard).get
+        encodeMove("1a1b", situation) must_== "00000000,00001001"
+        encodeMove("1b1a", situation) must_== "00001001,00000000"
+        encodeMove("1a2a", situation) must_== "00000000,00000001"
+        encodeMove("7g7f", situation) must_== "00111100,00110011"
+        encodeMove("8h2b", situation) must_== "01000110,00001010"
+        encodeMove("1i1h", situation) must_== "01001000,00111111"
+        encodeMove("1i2i", situation) must_== "01001000,01001001"
+        encodeMove("9a8a", situation) must_== "00001000,00000111"
+        encodeMove("9a9b", situation) must_== "00001000,00010001"
+        encodeMove("9i8i", situation) must_== "01010000,01001111"
+        encodeMove("9h9i", situation) must_== "01000111,01010000"
+        encodeMove("1a9i", situation) must_== "00000000,01010000"
       }
       "move with promotion symbols" in {
-        encodeMove("8h2b+") must_== "01000110,10001010"
-        encodeMove("8h2b=") must_== "01000110,00001010"
+        encodeMove("8h2b+", situation) must_== "01000110,10001010"
+        encodeMove("8h2b=", situation) must_== "01000110,00001010"
       }
       "drop" in {
-        encodeMove("P*5e") must_== "10000001,00101000"
-        encodeMove("L*6c") must_== "10000010,00010111"
-        encodeMove("N*3d") must_== "10000011,00011101"
-        encodeMove("S*2b") must_== "10000100,00001010"
-        encodeMove("G*9a") must_== "10000101,00001000"
-        encodeMove("B*9i") must_== "10000110,01010000"
-        encodeMove("R*1i") must_== "10000111,01001000"
+        val sfen      = Sfen("4k4/9/9/9/9/9/9/9/4K4 b RB2G2S2N2L9Prb2g2s2n2l9p 1")
+        val situation = sfen.toSituation(Standard).get
+        encodeMove("P*5e", situation) must_== "10000001,00101000"
+        encodeMove("L*6c", situation) must_== "10000010,00010111"
+        encodeMove("N*3d", situation) must_== "10000011,00011101"
+        encodeMove("S*2b", situation) must_== "10000100,00001010"
+        encodeMove("G*9a", situation) must_== "10000101,00001000"
+        encodeMove("B*9i", situation) must_== "10000110,01010000"
+        encodeMove("R*1i", situation) must_== "10000111,01001000"
       }
       "simple move minishogi" in {
-        encodeMove("1a1b", Minishogi) must_== "00000000,00000101"
-        encodeMove("1a2a", Minishogi) must_== "00000000,00000001"
-        encodeMove("4e5e", Minishogi) must_== "00010111,00011000"
-        encodeMove("5a1e", Minishogi) must_== "00000100,00010100"
-        encodeMove("B*3d", Minishogi) must_== "10000110,00010001"
+        val minishogi = Situation(Minishogi)
+        encodeMove("1a1b", minishogi) must_== "00000000,00000101"
+        encodeMove("1a2a", minishogi) must_== "00000000,00000001"
+        encodeMove("4e5e", minishogi) must_== "00010111,00011000"
+        encodeMove("5a1e", minishogi) must_== "00000100,00010100"
+        val minishogiWithBishop = setup(minishogi, Piece(Sente, Bishop))
+        encodeMove("B*3d", minishogiWithBishop) must_== "10000110,00010001"
       }
     }
     "write many moves" in {
       "all games" in {
         forall(format.usi.Fixtures.prod500standard) { usisStr =>
           val usis: List[Usi]  = Usi.readList(usisStr).get
-          val moves: Usi.Moves = Usi.Moves(usis, Standard)
-          val bin              = Binary.encodeMoves(moves, Standard).toList
+          val moves: Usi.Moves = Usi.Moves(usis, situation)
+          val bin              = Binary.encodeMoves(moves, situation.variant).toList
           bin.size must be_<=(usisStr.size)
         }
       }
     }
     "read single legal move" in {
-      val situation = makeSituation
       "simple move" in {
         decodeMove("00000000,00001001", situation) must_== "1a1b"
         decodeMove("00000000,00000001", situation) must_== "1a2a"
@@ -144,16 +152,17 @@ object BinaryTestUtils {
       b & 0xff
     }.toBinaryString.toInt
 
-  def encodeMove(m: String, variant: Variant = Standard): String = {
-    val usis: List[Usi] = Usi.readList(m).get
-    Binary.encodeMoves(usis, variant) map showByte mkString ","
+  def encodeMove(m: String, situation: Situation): String = {
+    val usis: List[Usi]  = Usi.readList(m).get
+    val moves: Usi.Moves = Usi.Moves(usis, situation)
+    Binary.encodeMoves(moves, situation.variant) map showByte mkString ","
   }
 
   def decodeMove(m: String, situation: Situation): String =
     Binary.decodeMove(m.split(',').toList.map(parseBinary), situation).head.usi
 
-  def decodeMoves(m: String, variant: Variant = Standard): Seq[String] =
-    Binary.decodeMoves(m.split(',').toList.map(parseBinary), variant, 600).map(_.usi)
+  def decodeMoves(m: String, situation: Situation): Seq[String] =
+    Binary.decodeMoves(m.split(',').toList.map(parseBinary), situation, 600).map(_.usi)
 
   def parseBinary(s: String): Byte = {
     var i    = s.size - 1

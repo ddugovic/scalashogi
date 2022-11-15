@@ -9,8 +9,9 @@ class BinaryPerfTest extends ShogiTest {
   val moves: List[Usi.Moves] = usis.map(Usi.Moves(_, variant.Standard))
   val iterations             = 15
 
+  val situation = makeSituation
   def runOne(moves: Usi.Moves) =
-    Binary.decodeMoves(Binary.encodeMoves(moves, variant.Standard).toVector, variant.Standard, 600)
+    Binary.decodeMoves(Binary.encodeMoves(moves, situation.variant).toVector, situation, 600)
   def run(): Unit = { moves foreach runOne }
 
   "playing a game" should {

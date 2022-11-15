@@ -8,11 +8,8 @@ object Binary {
   def decodeMove(bs: Seq[Byte], situation: Situation): Usi.Moves =
     Usi.Moves(Reader.decode(bs, situation.variant, 1).head, situation)
 
-  def decodeMoves(bs: Seq[Byte], variant: shogi.variant.Variant, nb: Int): Usi.Moves =
-    Usi.Moves(Reader.decode(bs, variant, nb), variant)
-
-  def encodeMoves(usis: List[Usi], variant: Variant): Array[Byte] =
-    Writer.encode(usis, variant)
+  def decodeMoves(bs: Seq[Byte], situation: Situation, nb: Int): Usi.Moves =
+    Usi.Moves(Reader.decode(bs, situation.variant, nb), situation)
 
   def encodeMoves(moves: Usi.Moves, variant: Variant): Array[Byte] =
     Writer.encode(moves, variant)
@@ -81,17 +78,8 @@ object Binary {
 
   private object Writer {
 
-    def encode(usis: List[Usi], variant: Variant): Array[Byte] =
-      usis.flatMap(encode(_, variant)).toArray
-
     def encode(moves: Usi.Moves, variant: Variant): Array[Byte] =
       moves.flatMap(encode(_, variant)).toArray
-
-    private def encode(usi: Usi, variant: Variant): Seq[Byte] =
-      usi match {
-        case Usi.Move(orig, dest, prom) => encodeMove(orig, dest, prom, variant)
-        case Usi.Drop(role, pos)        => encodeDrop(role, pos, variant)
-      }
 
     private def encode(move: shogi.Move, variant: Variant): Seq[Byte] =
       move match {

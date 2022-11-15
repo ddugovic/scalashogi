@@ -44,7 +44,7 @@ case class Game(
     apply(toParsedMove(usi, situation))
 
   // TODO: remove Usi compatibility wrapper
-  def usiMoves: shogi.format.usi.Usis = shogi.format.usi.Usi.Moves(moves).toUsis
+  def usiMoves: shogi.format.usi.Usi.Moves = shogi.format.usi.Usi.Moves(moves)
 
   def board = situation.board
 

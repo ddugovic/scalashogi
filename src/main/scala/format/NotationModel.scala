@@ -1,6 +1,7 @@
 package shogi
 package format
 
+// Analysis, study, or game record (imported) notation
 trait Notation {
 
   def moves: NotationMoves
@@ -48,16 +49,3 @@ case class NotationMove(
     // total time spent playing so far
     secondsTotal: Option[Int] = None
 )
-
-case class NotationMoves(val underlying: NotationMoves) {
-  def toList: List[NotationMove]     = underlying
-  def toSeq: Seq[NotationMove]       = underlying.toSeq
-  def toVector: Vector[NotationMove] = underlying.toVector
-}
-
-object NotationMoves {
-  implicit def apply(moves: List[NotationMove]): NotationMoves   = new NotationMoves(moves)
-  implicit def apply(moves: Seq[NotationMove]): NotationMoves    = new NotationMoves(moves.toList)
-  implicit def apply(moves: Vector[NotationMove]): NotationMoves = new NotationMoves(moves.toList)
-  implicit def toList(moves: NotationMoves): List[NotationMove]  = moves.toList
-}

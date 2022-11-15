@@ -14,6 +14,8 @@ package object shogi extends scalalib.Common with scalalib.OrnicarOption with sc
 
   type PositionHash = Array[Byte]
 
+  type NotationMoves = Vector[format.NotationMove]
+
   // TODO: remove backward compatibility code
   import cats.data.Validated
   import shogi.format.{ CsaMove, KifMove, ParsedDrop, ParsedMove }

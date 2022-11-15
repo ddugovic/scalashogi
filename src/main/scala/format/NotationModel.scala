@@ -3,11 +3,11 @@ package format
 
 trait Notation {
 
-  def moves: List[NotationMove]
+  def moves: NotationMoves
 
   def tags: Tags
 
-  def withMoves(moves: List[NotationMove]): Notation
+  def withMoves(moves: NotationMoves): Notation
 
   def withTags(tags: Tags): Notation
 
@@ -42,9 +42,22 @@ case class NotationMove(
     comments: List[String] = Nil,
     glyphs: Glyphs = Glyphs.empty,
     result: Option[String] = None,
-    variations: List[List[NotationMove]] = Nil,
+    variations: List[NotationMoves] = Nil,
     // time left for the user who made the move, after he made it
     secondsSpent: Option[Int] = None,
     // total time spent playing so far
     secondsTotal: Option[Int] = None
 )
+
+case class NotationMoves(val underlying: NotationMoves) {
+  def toList: List[NotationMove]     = underlying
+  def toSeq: Seq[NotationMove]       = underlying.toSeq
+  def toVector: Vector[NotationMove] = underlying.toVector
+}
+
+object NotationMoves {
+  implicit def apply(moves: List[NotationMove]): NotationMoves   = new NotationMoves(moves)
+  implicit def apply(moves: Seq[NotationMove]): NotationMoves    = new NotationMoves(moves.toList)
+  implicit def apply(moves: Vector[NotationMove]): NotationMoves = new NotationMoves(moves.toList)
+  implicit def toList(moves: NotationMoves): List[NotationMove]  = moves.toList
+}

@@ -176,7 +176,7 @@ object Replay {
   ): shogi.format.usi.Usi.Moves = shogi.format.usi.Usi.Moves(usis, initialSfen, variant)
 
   def plyAtSfen(
-      parsedMoves: List[ParsedMove],
+      moves: shogi.format.usi.Usi.Moves,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant,
       atSfen: Sfen
@@ -186,22 +186,20 @@ object Replay {
       @scala.annotation.tailrec
       def recursivePlyAtSfen(
           sit: Situation,
-          parsedMoves: List[ParsedMove],
+          moves: List[Move],
           ply: Int
       ): Validated[String, Int] =
-        parsedMoves match {
+        moves match {
           case Nil => invalid(s"Can't find $atSfen, reached ply $ply")
-          case parsedMove :: rest =>
-            sit(parsedMove) match {
-              case Valid(sitAfter) =>
-                if (sitAfter.toSfen.truncate == atSfen.truncate) valid(ply)
-                else recursivePlyAtSfen(sitAfter, rest, ply + 1)
-              case Invalid(err) => invalid(s"Failed plyAtSfen with: $err")
-            }
+          case move :: rest => {
+            val sitAfter = sit(move)
+            if (sitAfter.toSfen.truncate == atSfen.truncate) valid(ply)
+            else recursivePlyAtSfen(sitAfter, rest, ply + 1)
+          }
         }
 
       val sit = initialSfenToSituation(initialSfen, variant)
-      recursivePlyAtSfen(sit, parsedMoves, initialSfen.flatMap(_.moveNumber) | 1)
+      recursivePlyAtSfen(sit, moves.toList, initialSfen.flatMap(_.moveNumber) | 1)
     }
 
   private def initialSfenToSituation(initialSfen: Option[Sfen], variant: shogi.variant.Variant): Situation =

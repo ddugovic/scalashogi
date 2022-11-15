@@ -4,11 +4,10 @@ import cats.data.Validated
 
 import shogi.format.forsyth.Sfen
 import shogi.format.ParsedMove
-import shogi.format.usi.{ Usi, Usis }
 
 case class Game(
     situation: Situation,
-    moves: Usi.Moves = Usi.Moves(Vector.empty),
+    moves: Vector[Move] = Vector.empty,
     clock: Option[Clock] = None,
     plies: Int = 0,
     startedAtPly: Int = 0,
@@ -38,14 +37,14 @@ case class Game(
   def apply(parsedMove: ParsedMove): Validated[String, Game] =
     situation(parsedMove).map(applySituation(_))
 
-  def apply(usi: Usi, metrics: MoveMetrics): Validated[String, Game] =
+  def apply(usi: shogi.format.usi.Usi, metrics: MoveMetrics): Validated[String, Game] =
     apply(toParsedMove(usi, situation), metrics)
 
   def apply(usi: shogi.format.usi.Usi): Validated[String, Game] =
     apply(toParsedMove(usi, situation))
 
   // TODO: remove Usi compatibility wrapper
-  def usiMoves: Usis = moves.toUsis
+  def usiMoves: shogi.format.usi.Usis = shogi.format.usi.Usi.Moves(moves).toUsis
 
   def board = situation.board
 

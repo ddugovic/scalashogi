@@ -48,4 +48,8 @@ case class NotationMove(
     secondsSpent: Option[Int] = None,
     // total time spent playing so far
     secondsTotal: Option[Int] = None
-)
+) {
+  // TODO: remove backward compatibility code
+  def usiWithRole = move
+  def usi         = move.usi
+}

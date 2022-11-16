@@ -1,7 +1,5 @@
 package shogi
 
-import format.ParsedMoves
-
 import format.usi.Usi
 
 class ReplayPerfTest extends ShogiTest {

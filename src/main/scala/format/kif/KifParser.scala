@@ -116,9 +116,9 @@ object KifParser {
                   variations
                     .withFilter(_.variationStart == moveNumber.getOrElse(ply))
                     .map { v =>
-                      objMoves(v.moves, variant, v.variations, lastDest, ply + 1) getOrElse ParsedMoves.empty
+                      objMoves(v.moves, variant, v.variations, lastDest, ply + 1) getOrElse List.empty
                     }
-                    .filter(_.value.nonEmpty)
+                    .filter(_.nonEmpty)
                 }
                 if (uselessTimes) m1 else m1 withTimeSpent timeSpent withTimeTotal timeTotal
               } match {
@@ -129,7 +129,7 @@ object KifParser {
           }
       }
 
-    mk(Nil, strMoves, startDest, startNum) map ParsedMoves.apply
+    mk(Nil, strMoves, startDest, startNum)
   }
 
   def createVariations(vs: List[StrVariation]): List[StrVariation] = {

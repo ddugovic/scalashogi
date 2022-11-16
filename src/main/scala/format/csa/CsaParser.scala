@@ -62,7 +62,7 @@ object CsaParser {
           m withComments comments withTimeSpent timeSpent
         }
       ): Validated[String, ParsedMove]
-    }.sequence map { ParsedMoves.apply(_) }
+    }.sequence
   }
 
   def createTags(

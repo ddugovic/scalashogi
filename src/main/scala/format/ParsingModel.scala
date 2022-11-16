@@ -10,17 +10,6 @@ case class ParsedNotation(
     parsedMoves: ParsedMoves
 )
 
-// TODO: rename value -> underlying to follow common convention
-case class ParsedMoves(value: List[ParsedMove]) {
-  def toList: List[ParsedMove] = value
-}
-
-object ParsedMoves {
-  val empty                                                       = ParsedMoves(List.empty)
-  def apply(value: List[ParsedMove]): ParsedMoves                 = new ParsedMoves(value)
-  implicit def toList(parsedMoves: ParsedMoves): List[ParsedMove] = parsedMoves.toList
-}
-
 sealed trait ParsedMove {
 
   def toMove(sit: Situation): Validated[String, Move]
@@ -69,6 +58,7 @@ case class CsaMove(
     dest: Pos,
     orig: Pos,
     role: Role,
+    promotion: Boolean = false,
     metas: Metas = Metas.empty
 ) extends ParsedMove {
 

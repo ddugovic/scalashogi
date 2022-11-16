@@ -5,8 +5,9 @@ import cats.data.Validated.{ invalid, valid, Invalid, Valid }
 import cats.data.NonEmptyList
 import cats.implicits._
 
-import shogi.format.{ ParsedMove, ParsedMoves, Reader, Tag, Tags }
+import shogi.format.{ ParsedMove, Reader, Tag, Tags }
 import shogi.format.forsyth.Sfen
+import shogi.format.usi.Usis
 
 case class Replay(setup: Game, state: Game) {
   def apply(game: Game) = copy(state = game)
@@ -80,7 +81,7 @@ object Replay {
   ): (NonEmptyList[Game], Option[String]) = gamesWhileValid(moves.toUsiList, initialSfen, variant)
 
   def gamesWhileValid(
-      usis: List[shogi.format.usi.Usi],
+      usis: Usis,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): (NonEmptyList[Game], Option[String]) = {

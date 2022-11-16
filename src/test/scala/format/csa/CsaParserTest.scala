@@ -125,7 +125,7 @@ class CsaParserTest extends ShogiTest {
       'such a neat comment
       ' one more, keep com,ma
       '
-      ' drop P*5e""") must beValid.like { case ParsedNotation(_, _, ParsedMoves(List(move))) =>
+      ' drop P*5e""") must beValid.like { case ParsedNotation(_, _, List(move)) =>
         move.metas.comments must_== List("such a neat comment", "one more, keep com,ma", "drop P*5e")
       }
     }
@@ -135,7 +135,7 @@ class CsaParserTest extends ShogiTest {
       'such a neat comment
       ' one more
       %TORYO,T3
-      'comment on termination?""") must beValid.like { case ParsedNotation(_, _, ParsedMoves(List(move))) =>
+      'comment on termination?""") must beValid.like { case ParsedNotation(_, _, List(move)) =>
         move.metas.comments must_== List("such a neat comment", "one more", "comment on termination?")
       }
     }
@@ -193,14 +193,14 @@ P9+KY+KE+GI+KI+OU+KI+GI+KE+KY
   }
 
   "csa fixture 1" in {
-    parser(csa1) must beValid.like { case ParsedNotation(_, Tags(tags), ParsedMoves(pm)) =>
+    parser(csa1) must beValid.like { case ParsedNotation(_, Tags(tags), pm) =>
       pm.size must_== 111
       tags.size must_== 8
     }
   }
 
   "csa fixture 2" in {
-    parser(csa2) must beValid.like { case ParsedNotation(_, Tags(tags), ParsedMoves(pm)) =>
+    parser(csa2) must beValid.like { case ParsedNotation(_, Tags(tags), pm) =>
       pm.size must_== 258
       tags.size must_== 4
     }

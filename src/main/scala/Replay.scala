@@ -68,7 +68,7 @@ object Replay {
           }
       }
 
-    mk(NonEmptyList.one(makeGame(initialSfen, variant)), parsedMoves) match {
+    mk(NonEmptyList.one(makeGame(initialSfen, variant)), parsedMoves.toList) match {
       case (games, err) => (games.reverse, err)
     }
   }

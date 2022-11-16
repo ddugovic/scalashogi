@@ -3,7 +3,6 @@ package format
 
 import cats.data.Validated
 
-import shogi.format.ParsedMove
 import shogi.format.psn._
 
 object Reader {
@@ -21,11 +20,11 @@ object Reader {
     }
   }
 
-  def fromParsedNotation(parsed: ParsedNotation, op: List[ParsedMove] => List[ParsedMove]): Result =
+  def fromParsedNotation(parsed: ParsedNotation, op: ParsedMoves => ParsedMoves): Result =
     makeReplayFromParsedMoves(makeGame(parsed.tags), op(parsed.parsedMoves))
 
   def fromParsedMoves(
-      parsedMoves: List[ParsedMove],
+      parsedMoves: ParsedMoves,
       tags: Tags
   ): Result =
     makeReplayFromParsedMoves(makeGame(tags), parsedMoves)
@@ -36,8 +35,8 @@ object Reader {
   ): Result =
     makeReplayFromUsis(makeGame(tags), usis)
 
-  private def makeReplayFromParsedMoves(game: Game, parsedMoves: List[ParsedMove]): Result =
-    parsedMoves.foldLeft[Result](Result.Complete(Replay(game))) {
+  private def makeReplayFromParsedMoves(game: Game, parsedMoves: ParsedMoves): Result =
+    parsedMoves.toList.foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), parsedMove) =>
         replay
           .state(parsedMove)

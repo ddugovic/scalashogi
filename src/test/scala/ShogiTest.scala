@@ -25,7 +25,7 @@ trait ShogiTest extends Specification with ValidatedMatchers {
       case d: PieceDrop => format.ParsedDrop(d.role, d.pos)
     }
 
-  implicit def parseTrustedUsis(usis: List[format.usi.Usi]): ParsedMoves =
+  implicit def parseTrustedUsis(usis: List[format.usi.Usi]): ParsedMoves = ParsedMoves(
     // Converts NEL toList since NEL lacks sliding(2)
     // https://stackoverflow.com/a/47006446 might be cleaner
     // but zipped causes compiler warnings
@@ -39,6 +39,7 @@ trait ShogiTest extends Specification with ValidatedMatchers {
       }
       .toOption
       .get
+  )
 
   case class RichActor(actor: MoveActor) {
     def threatens(to: Pos): Boolean =

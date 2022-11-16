@@ -17,7 +17,7 @@ case class ParsedMoves(value: List[ParsedMove]) {
 
 object ParsedMoves {
   val empty                                                       = ParsedMoves(List.empty)
-  implicit def apply(value: List[ParsedMove]): ParsedMoves        = new ParsedMoves(value)
+  def apply(value: List[ParsedMove]): ParsedMoves                 = new ParsedMoves(value)
   implicit def toList(parsedMoves: ParsedMoves): List[ParsedMove] = parsedMoves.toList
 }
 

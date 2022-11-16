@@ -7,7 +7,6 @@ import cats.implicits._
 
 import shogi.format.{ ParsedMove, Reader, Tag, Tags }
 import shogi.format.forsyth.Sfen
-import shogi.format.usi.Usis
 
 case class Replay(setup: Game, state: Game) {
   def apply(game: Game) = copy(state = game)
@@ -53,28 +52,6 @@ object Replay {
     }
 
   def gamesWhileValid(
-      parsedMoves: ParsedMoves,
-      initialSfen: Option[Sfen],
-      variant: shogi.variant.Variant
-  ): (NonEmptyList[Game], Option[String]) = {
-
-    @scala.annotation.tailrec
-    def mk(games: NonEmptyList[Game], parsedMoves: List[ParsedMove]): (NonEmptyList[Game], Option[String]) =
-      parsedMoves match {
-        case Nil => (games, None)
-        case parsedMove :: rest =>
-          games.head(parsedMove) match {
-            case Valid(newGame) => mk(newGame :: games, rest)
-            case Invalid(err)   => (games, err.some)
-          }
-      }
-
-    mk(NonEmptyList.one(makeGame(initialSfen, variant)), parsedMoves.toList) match {
-      case (games, err) => (games.reverse, err)
-    }
-  }
-
-  def gamesWhileValid(
       moves: shogi.format.usi.Usi.Moves,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
@@ -106,7 +83,7 @@ object Replay {
   }
 
   def situations(
-      usis: shogi.format.usi.Usis,
+      usis: Usis,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): Validated[String, NonEmptyList[Situation]] = {
@@ -115,7 +92,7 @@ object Replay {
   }
 
   def situations(
-      usis: List[shogi.format.usi.Usi],
+      usis: Usis,
       situation: Situation
   ): Validated[String, NonEmptyList[Situation]] =
     usis.foldLeft[Validated[String, NonEmptyList[Situation]]](valid(NonEmptyList.one(situation))) {
@@ -171,7 +148,7 @@ object Replay {
     .reverse
 
   def usiWithRoleWhilePossible(
-      usis: shogi.format.usi.Usis,
+      usis: Usis,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): shogi.format.usi.Usi.Moves = shogi.format.usi.Usi.Moves(usis, initialSfen, variant)

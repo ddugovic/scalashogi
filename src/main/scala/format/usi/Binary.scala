@@ -35,10 +35,10 @@ object Binary {
   }
 
   private object Reader {
-    def decode(bs: Seq[Byte], variant: Variant, nb: Int): Vector[Usi] =
+    def decode(bs: Seq[Byte], variant: Variant, nb: Int): Usis =
       decodeMovesAndDrops(bs take (nb * 2) map toInt, variant)
 
-    private def decodeMovesAndDrops(mds: Seq[Int], variant: Variant): Vector[Usi] =
+    private def decodeMovesAndDrops(mds: Seq[Int], variant: Variant): Usis =
       mds
         .grouped(2)
         .map {
@@ -48,7 +48,7 @@ object Binary {
             else decodeMove(i1, i2, variant)
           case x => !!(x map showByte mkString ",")
         }
-        .toVector
+        .toList
 
     private def decodeMove(i1: Int, i2: Int, variant: Variant): Usi =
       Usi.Move(

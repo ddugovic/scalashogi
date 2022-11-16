@@ -16,4 +16,5 @@ package object shogi extends scalalib.Common with scalalib.OrnicarOption with sc
 
   type NotationMoves = Vector[format.NotationMove]
   type ParsedMoves   = List[format.ParsedMove]
+  type Usis          = List[format.usi.Usi]
 }

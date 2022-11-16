@@ -15,20 +15,6 @@ sealed trait Usi {
 
 }
 
-// https://stackoverflow.com/a/39072117
-case class Usis(val underlying: List[Usi]) {
-  def toList: List[Usi]     = underlying
-  def toSeq: Seq[Usi]       = underlying.toSeq
-  def toVector: Vector[Usi] = underlying.toVector
-}
-
-object Usis {
-  implicit def apply(usis: List[Usi]): Usis   = new Usis(usis)
-  implicit def apply(usis: Seq[Usi]): Usis    = new Usis(usis.toList)
-  implicit def apply(usis: Vector[Usi]): Usis = new Usis(usis.toList)
-  implicit def toList(usis: Usis): List[Usi]  = usis.toList
-}
-
 object Usi {
 
   // https://stackoverflow.com/a/39072117
@@ -37,7 +23,7 @@ object Usi {
     def toSeq: Seq[shogi.Move]       = underlying.toSeq
     def toVector: Vector[shogi.Move] = underlying
     // TODO: remove Usi facade
-    def toUsis: Usis = Usis(underlying.map(_.usi))
+    def toUsis: Usis = toList.map(_.usi)
   }
   implicit def apply(moves: List[shogi.Move]): Moves      = new Moves(moves.toVector)
   implicit def apply(moves: Seq[shogi.Move]): Moves       = new Moves(moves.toVector)
@@ -50,9 +36,9 @@ object Usi {
     def apply(moves: Moves, initialSfen: Option[Sfen], variant: Variant): Moves =
       apply(moves.toUsis, initialSfen, variant)
 
-    def apply(usi: Usi, situation: Situation): Moves = apply(Usis(Vector(usi)), situation)
+    def apply(usi: Usi, situation: Situation): Moves = apply(List(usi), situation)
 
-    def apply(usis: Usis, situation: Situation): Moves = Moves(
+    def apply(usis: List[Usi], situation: Situation): Moves = Moves(
       Replay
         .situations(usis, situation)
         .map { _.tail.map { _.history.lastMove.get } }
@@ -61,9 +47,13 @@ object Usi {
         .toVector
     )
 
-    def apply(usis: Usis, variant: Variant): Moves = apply(usis, None, variant)
+    def apply(usis: Vector[Usi], situation: Situation): Moves = apply(usis.toList, situation)
 
-    def apply(usis: Usis, initialSfen: Option[Sfen], variant: Variant): Moves = Moves(
+    def apply(usis: List[Usi], variant: Variant): Moves = apply(usis, None, variant)
+
+    def apply(usis: Vector[Usi], variant: Variant): Moves = apply(usis.toList, None, variant)
+
+    def apply(usis: List[Usi], initialSfen: Option[Sfen], variant: Variant): Moves = Moves(
       Replay
         .situations(usis, initialSfen, variant)
         .map { _.tail.map { _.history.lastMove.get } }
@@ -71,6 +61,9 @@ object Usi {
         .get
         .toVector
     )
+
+    def apply(usis: Vector[Usi], initialSfen: Option[Sfen], variant: Variant): Moves =
+      apply(usis.toList, initialSfen, variant)
   }
 
   case class Move(
@@ -140,10 +133,10 @@ object Usi {
       Usi.Drop(usiStr)
     else Usi.Move(usiStr)
 
-  def readList(moves: List[String]): Option[List[Usi]] =
+  def readList(moves: List[String]): Option[Usis] =
     moves.toList.map(apply).sequence
 
-  def readList(moves: String): Option[List[Usi]] =
+  def readList(moves: String): Option[Usis] =
     readList(moves.split(' ').toList)
 
   def toParsedMove(usi: Usi, situation: Situation): ParsedMove = usi match {

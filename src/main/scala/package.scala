@@ -20,11 +20,6 @@ package object shogi extends scalalib.Common with scalalib.OrnicarOption with sc
   import cats.data.Validated
   import shogi.format.{ CsaMove, KifMove, ParsedDrop, ParsedMove }
   import shogi.format.usi.Usi
-  implicit def toParsedMove(usi: Usi, situation: Situation): ParsedMove = usi match {
-    case m: Usi.Move => KifMove(m.dest, m.orig, situation.board.pieces(m.orig).role, m.promotion)
-    case d: Usi.Drop => ParsedDrop(d.role, d.pos)
-  }
-  implicit def toParsedMove(situation: Situation, usi: Usi): ParsedMove = toParsedMove(usi, situation)
   implicit def toMove(usi: Usi, situation: Situation): Move = usi match {
     case m: Usi.Move => m(situation)
     case d: Usi.Drop => d(situation)

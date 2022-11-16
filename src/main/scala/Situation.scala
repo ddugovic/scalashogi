@@ -5,7 +5,6 @@ import cats.implicits._
 
 import shogi.format.forsyth.Sfen
 import shogi.format.ParsedMove
-import shogi.format.usi.Usi
 import shogi.variant.Variant
 
 case class Situation(
@@ -22,7 +21,9 @@ case class Situation(
       case drop: PieceDrop => variant.applyDrop(this, drop)
     }
 
-  def apply(usi: Usi): Validated[String, Situation] = apply(toParsedMove(usi, this))
+  def apply(usi: shogi.format.usi.Usi): Validated[String, Situation] = apply(
+    shogi.format.usi.Usi.toParsedMove(usi, this)
+  )
 
   def apply(parsedMove: ParsedMove): Validated[String, Situation] =
     parsedMove.toMove(this) map apply

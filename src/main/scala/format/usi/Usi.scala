@@ -147,5 +147,10 @@ object Usi {
   def readList(moves: String): Option[List[Usi]] =
     readList(moves.split(' ').toList)
 
+  def toParsedMove(usi: Usi, situation: Situation): ParsedMove = usi match {
+    case m: Usi.Move => KifMove(m.dest, m.orig, situation.board.pieces(m.orig).role, m.promotion)
+    case d: Usi.Drop => ParsedDrop(d.role, d.pos)
+  }
+
   implicit def toString(usi: Usi): String = usi.toString
 }

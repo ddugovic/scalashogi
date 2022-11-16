@@ -3,6 +3,7 @@ package shogi
 import shogi.format.usi.Usi
 
 sealed trait Move {
+  // TODO: remove Usi facade
   def usi: Usi
   def role: Role
   def positions: List[Pos]

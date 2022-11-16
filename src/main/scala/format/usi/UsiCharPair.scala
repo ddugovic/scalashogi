@@ -14,6 +14,8 @@ case class UsiCharPair(a: Char, b: Char) {
 // Keep 251-255 reserved for some special cases
 object UsiCharPair {
 
+  def apply(move: Move, variant: Variant): UsiCharPair = apply(move.usi, variant)
+
   def apply(usi: Usi, variant: Variant): UsiCharPair =
     usi match {
       case Usi.Move(orig, dest, false) =>

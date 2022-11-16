@@ -36,13 +36,12 @@ object Usi {
     def toList: List[shogi.Move]     = underlying.toList
     def toSeq: Seq[shogi.Move]       = underlying.toSeq
     def toVector: Vector[shogi.Move] = underlying
-    def toUsis: Usis                 = Usis(underlying map toUsi)
-    def toUsiList: List[Usi]         = toUsis.toList
+    // TODO: remove Usi facade
+    def toUsis: Usis = Usis(underlying.map(_.usi))
   }
   implicit def apply(moves: List[shogi.Move]): Moves      = new Moves(moves.toVector)
   implicit def apply(moves: Seq[shogi.Move]): Moves       = new Moves(moves.toVector)
   implicit def apply(moves: Vector[shogi.Move]): Moves    = new Moves(moves)
-  implicit def toUsis(moves: Moves): Usis                 = moves.toUsis
   implicit def toVector(moves: Moves): Vector[shogi.Move] = moves.toVector
 
   object Moves {

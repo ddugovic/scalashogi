@@ -78,7 +78,7 @@ object Replay {
       moves: shogi.format.usi.Usi.Moves,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
-  ): (NonEmptyList[Game], Option[String]) = gamesWhileValid(moves.toUsiList, initialSfen, variant)
+  ): (NonEmptyList[Game], Option[String]) = gamesWhileValid(moves.toUsis, initialSfen, variant)
 
   def gamesWhileValid(
       usis: Usis,

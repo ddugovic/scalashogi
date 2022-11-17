@@ -38,7 +38,7 @@ object Replay {
     )
 
   def replay(
-      parsedMoves: List[ParsedMove],
+      parsedMoves: ParsedMoves,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): Validated[String, Replay] =

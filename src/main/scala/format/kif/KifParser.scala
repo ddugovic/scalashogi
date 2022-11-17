@@ -101,11 +101,11 @@ object KifParser {
 
     @scala.annotation.tailrec
     def mk(
-        parsedMoves: List[ParsedMove],
+        parsedMoves: ParsedMoves,
         strMoves: List[StrMove],
         lastDest: Option[Pos],
         ply: Int
-    ): Validated[String, List[ParsedMove]] =
+    ): Validated[String, ParsedMoves] =
       strMoves match {
         case Nil => valid(parsedMoves.reverse)
         case move :: rest =>

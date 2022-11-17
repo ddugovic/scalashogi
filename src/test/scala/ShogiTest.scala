@@ -25,21 +25,6 @@ trait ShogiTest extends Specification with ValidatedMatchers {
       case d: PieceDrop => format.ParsedDrop(d.role, d.pos)
     }
 
-  implicit def parseTrustedUsis(usis: List[format.usi.Usi]): ParsedMoves =
-    // Converts NEL toList since NEL lacks sliding(2)
-    // https://stackoverflow.com/a/47006446 might be cleaner
-    // but zipped causes compiler warnings
-    Replay
-      .situations(usis, makeSituation)
-      .map {
-        _.toList
-          .sliding(2)
-          .map { pair => parsedMove(pair.head, pair.tail.head) }
-          .toList
-      }
-      .toOption
-      .get
-
   case class RichActor(actor: MoveActor) {
     def threatens(to: Pos): Boolean =
       actor.piece.eyes(actor.pos, to) && {

@@ -81,8 +81,8 @@ object Usi {
     else Usi.Move(usiStr)
 
   def readList(moves: List[String]): Option[Usis] =
-    moves.toList.map(apply).sequence
+    moves.toVector.map(apply).sequence
 
-  def readList(moves: String): Option[Usis] =
+  def read(moves: String): Option[Usis] =
     readList(moves.split(' ').toList)
 }

@@ -7,8 +7,8 @@ class BinaryPerfTest extends ShogiTest {
 
   // args(skipAll = true)
 
-  val usis: List[List[Usi]] = Fixtures.prod500standard.map(Usi.readList(_).get)
-  val iterations            = 15
+  val usis: List[Usis] = Fixtures.prod500standard.map(Usi.read(_).get)
+  val iterations       = 15
 
   def runOne(usis: Usis) =
     Binary.decodeMoves(Binary.encodeMoves(usis, Standard).toVector, Standard, 600)

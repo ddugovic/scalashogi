@@ -3,7 +3,7 @@ package shogi
 import format.usi.Usi
 
 class ReplayTest extends ShogiTest {
-  val usis: List[Usis] = shogi.format.usi.Fixtures.prod500standard.map(Usi.readList(_).get)
+  val usis: List[Usis] = shogi.format.usi.Fixtures.prod500standard.map(Usi.read(_).get)
 
   "all fixtures" should {
     "have no errors and correct size" in {

@@ -48,7 +48,7 @@ object Binary {
             else decodeMove(i1, i2, variant)
           case x => !!(x map showByte mkString ",")
         }
-        .toList
+        .toVector
 
     private def decodeMove(i1: Int, i2: Int, variant: Variant): Usi =
       Usi.Move(

@@ -52,12 +52,6 @@ object Replay {
     }
 
   def gamesWhileValid(
-      moves: Moves,
-      initialSfen: Option[Sfen],
-      variant: shogi.variant.Variant
-  ): (NonEmptyList[Game], Option[String]) = gamesWhileValid(toUsis(moves), initialSfen, variant)
-
-  def gamesWhileValid(
       usis: Usis,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
@@ -77,7 +71,7 @@ object Replay {
           }
       }
 
-    mk(NonEmptyList.one(makeGame(initialSfen, variant)), usis) match {
+    mk(NonEmptyList.one(makeGame(initialSfen, variant)), usis.toList) match {
       case (games, err) => (games.reverse, err)
     }
   }

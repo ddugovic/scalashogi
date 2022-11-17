@@ -130,6 +130,12 @@ object Replay {
       usis: Usis,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
+  ): Moves = moveWhilePossible(usis, initialSfen, variant)
+
+  def moveWhilePossible(
+      usis: Usis,
+      initialSfen: Option[Sfen],
+      variant: shogi.variant.Variant
   ): Moves =
     situations(usis, initialSfen, variant)
       .map { _.tail.map { _.history.lastMove.get } }

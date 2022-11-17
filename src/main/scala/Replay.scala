@@ -5,7 +5,7 @@ import cats.data.Validated.{ invalid, valid, Invalid, Valid }
 import cats.data.NonEmptyList
 import cats.implicits._
 
-import shogi.format.{ ParsedMove, Reader, Tag, Tags }
+import shogi.format.{ Reader, Tag, Tags }
 import shogi.format.forsyth.Sfen
 
 case class Replay(setup: Game, state: Game) {
@@ -105,15 +105,6 @@ object Replay {
     } map (_.reverse)
 
   def situations(
-      moves: Seq[Move],
-      initialSfen: Option[Sfen],
-      variant: shogi.variant.Variant
-  ): NonEmptyList[Situation] = {
-    val init = initialSfenToSituation(initialSfen, variant)
-    situations(init, moves)
-  }
-
-  def situations(
       situation: Situation,
       moves: List[Move]
   ): NonEmptyList[Situation] = moves
@@ -122,12 +113,7 @@ object Replay {
 
   def situations(
       situation: Situation,
-      moves: Seq[Move]
-  ): NonEmptyList[Situation] = situations(situation, moves.toList)
-
-  def situations(
-      situation: Situation,
-      moves: Vector[Move]
+      moves: Moves
   ): NonEmptyList[Situation] = situations(situation, moves.toList)
 
   // TODO: rename variable usis to moves

@@ -8,17 +8,17 @@ import shogi.variant.Standard
 
 case class Csa(
     tags: Tags,
-    moves: Vector[NotationMove],
+    moves: NotationMoves,
     initial: Initial = Initial.empty
 ) extends Notation {
 
-  def withMoves(moves: Vector[NotationMove]) =
+  def withMoves(moves: NotationMoves) =
     copy(moves = moves)
 
   def withTags(tags: Tags) =
     copy(tags = tags)
 
-  private def renderMainline(moveline: Vector[NotationMove], turn: Color): String =
+  private def renderMainline(moveline: NotationMoves, turn: Color): String =
     moveline
       .foldLeft[(List[String], Color)]((Nil, turn)) { case ((acc, curTurn), cur) =>
         ((Csa.renderNotationMove(cur, curTurn.some) :: acc), !curTurn)

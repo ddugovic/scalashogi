@@ -1,6 +1,5 @@
 package shogi
-package format
-package usi
+package format.usi
 
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }

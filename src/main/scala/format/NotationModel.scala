@@ -4,11 +4,11 @@ package format
 // Analysis, study, or game record (imported) notation
 trait Notation {
 
-  def moves: Vector[NotationMove]
+  def moves: NotationMoves
 
   def tags: Tags
 
-  def withMoves(moves: Vector[NotationMove]): Notation
+  def withMoves(moves: NotationMoves): Notation
 
   def withTags(tags: Tags): Notation
 
@@ -43,7 +43,7 @@ case class NotationMove(
     comments: List[String] = Nil,
     glyphs: Glyphs = Glyphs.empty,
     result: Option[String] = None,
-    variations: List[Vector[NotationMove]] = Nil,
+    variations: List[NotationMoves] = Nil,
     // time left for the user who made the move, after he made it
     secondsSpent: Option[Int] = None,
     // total time spent playing so far

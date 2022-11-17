@@ -9,17 +9,17 @@ import shogi.format.forsyth.Sfen
 
 case class Kif(
     tags: Tags,
-    moves: Vector[NotationMove],
+    moves: NotationMoves,
     initial: Initial = Initial.empty
 ) extends Notation {
 
-  def withMoves(moves: Vector[NotationMove]) =
+  def withMoves(moves: NotationMoves) =
     copy(moves = moves)
 
   def withTags(tags: Tags) =
     copy(tags = tags)
 
-  def renderMovesAndVariations(moveline: Vector[NotationMove]): String = {
+  def renderMovesAndVariations(moveline: NotationMoves): String = {
     val mainline = moveline
       .foldLeft[(List[String], Option[Pos])]((Nil, None)) { case ((acc, lastDest), cur) =>
         ((Kif.renderNotationMove(cur, lastDest) :: acc), cur.move.positions.lastOption)

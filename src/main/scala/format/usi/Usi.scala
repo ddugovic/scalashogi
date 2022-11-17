@@ -15,7 +15,6 @@ sealed trait Usi {
 
   def positions: List[Pos]
   def toMove(sit: Situation): Validated[String, shogi.Move]
-
 }
 
 object Usi {
@@ -120,6 +119,4 @@ object Usi {
 
   def readList(moves: String): Option[Usis] =
     readList(moves.split(' ').toList)
-
-  implicit def toString(usi: Usi): String = usi.toString
 }

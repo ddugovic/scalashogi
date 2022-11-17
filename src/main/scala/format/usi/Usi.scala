@@ -34,9 +34,6 @@ object Usi {
   object Moves {
 
     // TODO: remove backward compatibility code
-    def apply(moves: Moves, initialSfen: Option[Sfen], variant: Variant): Moves =
-      apply(moves.toUsis, initialSfen, variant)
-
     def apply(usi: Usi, situation: Situation): Moves = apply(List(usi), situation)
 
     def apply(usis: List[Usi], situation: Situation): Moves = Moves(

@@ -14,9 +14,6 @@ object Binary {
   def encodeMoves(us: Usis, variant: Variant): Array[Byte] =
     Writer.encode(us, variant)
 
-  def encodeMoves(ms: Usi.Moves, variant: Variant): Array[Byte] =
-    Writer.encode(ms.toUsis, variant)
-
   private object Encoding {
     val roleToInt: Map[Role, Int] = Map(
       King           -> 0,

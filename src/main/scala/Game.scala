@@ -7,7 +7,7 @@ import shogi.format.ParsedMove
 
 case class Game(
     situation: Situation,
-    moves: Vector[Move] = Vector.empty,
+    moves: Moves = Vector.empty,
     clock: Option[Clock] = None,
     plies: Int = 0,
     startedAtPly: Int = 0,
@@ -29,8 +29,7 @@ case class Game(
 
   def apply(move: Move): Game = applySituation(situation(move))
 
-  // TODO: For performance, remove Usi -> ParsedMove conversion
-  // then for stability, introduce ParsedMove -> Usi conversion
+  // TODO: For stability, introduce ParsedMove -> Usi conversion
   def apply(parsedMove: ParsedMove, metrics: MoveMetrics): Validated[String, Game] =
     situation(parsedMove).map(applySituation(_, metrics))
 
@@ -44,7 +43,8 @@ case class Game(
     situation(usi).map(applySituation(_))
 
   // TODO: remove Usi compatibility wrapper
-  def usiMoves: shogi.format.usi.Usi.Moves = shogi.format.usi.Usi.Moves(moves)
+  def usiMoves: Moves = moves
+  def usis: Usis      = toUsis(moves)
 
   def board = situation.board
 
@@ -79,15 +79,6 @@ case class Game(
 }
 
 object Game {
-  def apply(
-      situation: Situation,
-      usiMoves: shogi.format.usi.Usi.Moves,
-      clock: Option[Clock],
-      plies: Int,
-      startedAtPly: Int,
-      startedAtMove: Int
-  ): Game =
-    Game(situation, usiMoves, clock, plies, startedAtPly, startedAtMove)
 
   def apply(situation: Situation): Game =
     new Game(situation)

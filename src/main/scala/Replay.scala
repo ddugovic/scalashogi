@@ -52,10 +52,10 @@ object Replay {
     }
 
   def gamesWhileValid(
-      moves: shogi.format.usi.Usi.Moves,
+      moves: Moves,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
-  ): (NonEmptyList[Game], Option[String]) = gamesWhileValid(moves.toUsis, initialSfen, variant)
+  ): (NonEmptyList[Game], Option[String]) = gamesWhileValid(toUsis(moves), initialSfen, variant)
 
   def gamesWhileValid(
       usis: Usis,
@@ -132,7 +132,7 @@ object Replay {
 
   // TODO: rename variable usis to moves
   def situations(
-      usis: shogi.format.usi.Usi.Moves,
+      usis: Moves,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): NonEmptyList[Situation] = {
@@ -140,21 +140,19 @@ object Replay {
     situations(init, usis)
   }
 
-  def situations(
-      situation: Situation,
-      moves: shogi.format.usi.Usi.Moves
-  ): NonEmptyList[Situation] = moves
-    .foldLeft[NonEmptyList[Situation]](NonEmptyList.one(situation)) { (acc, move) => acc.head(move) :: acc }
-    .reverse
-
   def usiWithRoleWhilePossible(
       usis: Usis,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
-  ): shogi.format.usi.Usi.Moves = shogi.format.usi.Usi.Moves(usis, initialSfen, variant)
+  ): Moves =
+    situations(usis, initialSfen, variant)
+      .map { _.tail.map { _.history.lastMove.get } }
+      .toOption
+      .get
+      .toVector
 
   def plyAtSfen(
-      moves: shogi.format.usi.Usi.Moves,
+      moves: Moves,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant,
       atSfen: Sfen

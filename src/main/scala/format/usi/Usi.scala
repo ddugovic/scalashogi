@@ -5,8 +5,6 @@ package usi
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
-import shogi.format.forsyth.Sfen
-import shogi.variant.Variant
 
 sealed trait Usi {
 
@@ -18,37 +16,6 @@ sealed trait Usi {
 }
 
 object Usi {
-
-  // https://stackoverflow.com/a/39072117
-  case class Moves(val underlying: Vector[shogi.Move]) {
-    def toList: List[shogi.Move]     = underlying.toList
-    def toSeq: Seq[shogi.Move]       = underlying.toSeq
-    def toVector: Vector[shogi.Move] = underlying
-    // TODO: remove Usi facade
-    def toUsis: Usis = toList.map(_.usi)
-  }
-  implicit def apply(moves: Vector[shogi.Move]): Moves    = new Moves(moves)
-  implicit def toVector(moves: Moves): Vector[shogi.Move] = moves.toVector
-
-  object Moves {
-
-    // TODO: remove backward compatibility code
-    def apply(usis: List[Usi], variant: Variant): Moves = apply(usis, None, variant)
-
-    def apply(usis: Vector[Usi], variant: Variant): Moves = apply(usis.toList, None, variant)
-
-    def apply(usis: List[Usi], initialSfen: Option[Sfen], variant: Variant): Moves = Moves(
-      Replay
-        .situations(usis, initialSfen, variant)
-        .map { _.tail.map { _.history.lastMove.get } }
-        .toOption
-        .get
-        .toVector
-    )
-
-    def apply(usis: Vector[Usi], initialSfen: Option[Sfen], variant: Variant): Moves =
-      apply(usis.toList, initialSfen, variant)
-  }
 
   case class Move(
       orig: Pos,

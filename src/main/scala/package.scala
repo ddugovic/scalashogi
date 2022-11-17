@@ -14,6 +14,8 @@ package object shogi extends scalalib.Common with scalalib.OrnicarOption with sc
 
   type PositionHash = Array[Byte]
 
+  type Moves       = Vector[Move]
   type ParsedMoves = List[format.ParsedMove]
   type Usis        = List[format.usi.Usi]
+  implicit def toUsis(moves: Moves): Usis = moves.toList.map(_.usi)
 }

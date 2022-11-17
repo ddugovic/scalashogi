@@ -25,8 +25,6 @@ object Usi {
     // TODO: remove Usi facade
     def toUsis: Usis = toList.map(_.usi)
   }
-  implicit def apply(moves: List[shogi.Move]): Moves      = new Moves(moves.toVector)
-  implicit def apply(moves: Seq[shogi.Move]): Moves       = new Moves(moves.toVector)
   implicit def apply(moves: Vector[shogi.Move]): Moves    = new Moves(moves)
   implicit def toVector(moves: Moves): Vector[shogi.Move] = moves.toVector
 

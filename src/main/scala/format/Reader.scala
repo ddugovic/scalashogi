@@ -30,10 +30,22 @@ object Reader {
     makeReplayFromParsedMoves(makeGame(tags), parsedMoves)
 
   def fromUsi(
-      usis: Iterable[shogi.Move],
+      usis: Usis,
       tags: Tags
   ): Result =
     makeReplayFromUsis(makeGame(tags), usis)
+
+  private def makeReplayFromUsis(game: Game, usis: Usis): Result =
+    usis.foldLeft[Result](Result.Complete(Replay(game))) {
+      case (Result.Complete(replay), usi) =>
+        replay
+          .state(usi)
+          .fold(
+            err => Result.Incomplete(replay, err),
+            game => Result.Complete(replay(game))
+          )
+      case (r: Result.Incomplete, _) => r
+    }
 
   private def makeReplayFromParsedMoves(game: Game, parsedMoves: ParsedMoves): Result =
     parsedMoves.toList.foldLeft[Result](Result.Complete(Replay(game))) {
@@ -44,13 +56,6 @@ object Reader {
             err => Result.Incomplete(replay, err),
             situation => Result.Complete(Replay(game, situation))
           )
-      case (r: Result.Incomplete, _) => r
-    }
-
-  private def makeReplayFromUsis(game: Game, moves: Iterable[shogi.Move]): Result =
-    moves.foldLeft[Result](Result.Complete(Replay(game))) {
-      case (Result.Complete(replay), move) =>
-        Result.Complete(Replay(game, replay.state(move)))
       case (r: Result.Incomplete, _) => r
     }
 

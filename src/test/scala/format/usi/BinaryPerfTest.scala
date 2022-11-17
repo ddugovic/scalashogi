@@ -1,18 +1,18 @@
 package shogi
 package format.usi
 
+import shogi.variant.Standard
+
 class BinaryPerfTest extends ShogiTest {
 
   // args(skipAll = true)
 
-  val usis: List[List[Usi]]  = Fixtures.prod500standard.map(Usi.readList(_).get)
-  val moves: List[Usi.Moves] = usis.map(Usi.Moves(_, variant.Standard))
-  val iterations             = 15
+  val usis: List[List[Usi]] = Fixtures.prod500standard.map(Usi.readList(_).get)
+  val iterations            = 15
 
-  val situation = makeSituation
-  def runOne(moves: Usi.Moves) =
-    Binary.decodeMoves(Binary.encodeMoves(moves, situation.variant).toVector, situation, 600)
-  def run(): Unit = { moves foreach runOne }
+  def runOne(usis: Usis) =
+    Binary.decodeMoves(Binary.encodeMoves(usis, Standard).toVector, Standard, 600)
+  def run(): Unit = { usis foreach runOne }
 
   "playing a game" should {
     "many times" in {
@@ -23,10 +23,10 @@ class BinaryPerfTest extends ShogiTest {
         val start = System.currentTimeMillis
         run()
         val duration = System.currentTimeMillis - start
-        println(s"${moves.size} games in $duration ms")
+        println(s"${usis.size} games in $duration ms")
         duration
       }
-      val nbGames    = iterations * moves.size
+      val nbGames    = iterations * usis.size
       val moveMicros = (1000 * durations.sum) / nbGames
       println(s"Average = $moveMicros microseconds per game")
       println(s"          ${1000000 / moveMicros} games per second")

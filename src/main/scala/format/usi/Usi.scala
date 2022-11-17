@@ -34,17 +34,6 @@ object Usi {
   object Moves {
 
     // TODO: remove backward compatibility code
-    def apply(usis: List[Usi], situation: Situation): Moves = Moves(
-      Replay
-        .situations(usis, situation)
-        .map { _.tail.map { _.history.lastMove.get } }
-        .toOption
-        .get
-        .toVector
-    )
-
-    def apply(usis: Vector[Usi], situation: Situation): Moves = apply(usis.toList, situation)
-
     def apply(usis: List[Usi], variant: Variant): Moves = apply(usis, None, variant)
 
     def apply(usis: Vector[Usi], variant: Variant): Moves = apply(usis.toList, None, variant)

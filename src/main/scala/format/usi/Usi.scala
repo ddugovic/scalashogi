@@ -83,11 +83,6 @@ object Usi {
 
     def positions = List(orig, dest)
 
-    def apply(pieces: PieceMap): shogi.Move =
-      PieceMove(pieces(orig), orig, dest, pieces.contains(dest), promotion)
-
-    def apply(situation: Situation): shogi.Move = apply(situation.board.pieces)
-
     def toMove(sit: Situation): Validated[String, shogi.Move] =
       Validated.fromOption(sit.board(orig), s"No piece at $orig") map { p =>
         PieceMove(sit.board, p, orig, dest, promotion)
@@ -114,11 +109,6 @@ object Usi {
 
     def positions = List(pos)
 
-    def apply(color: Color): shogi.Move =
-      PieceDrop(Piece(color, role), pos)
-
-    def apply(situation: Situation): shogi.Move = apply(situation.color)
-
     def toMove(sit: Situation): Validated[String, shogi.Move] =
       if (sit.variant.handRoles contains role) valid(PieceDrop(Piece(sit.color, role), pos))
       else invalid(s"$role can't be dropped in ${sit.variant} shogi")
@@ -135,8 +125,6 @@ object Usi {
       } yield Drop(role, pos)
 
   }
-
-  case class WithRole(usi: Usi, role: Role)
 
   def apply(usiStr: String): Option[Usi] =
     if (usiStr contains '*')

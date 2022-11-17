@@ -21,9 +21,8 @@ case class Situation(
       case drop: PieceDrop => variant.applyDrop(this, drop)
     }
 
-  def apply(usi: shogi.format.usi.Usi): Validated[String, Situation] = apply(
-    shogi.format.usi.Usi.toParsedMove(usi, this)
-  )
+  def apply(usi: shogi.format.usi.Usi): Validated[String, Situation] =
+    usi.toMove(this) map apply
 
   def apply(parsedMove: ParsedMove): Validated[String, Situation] =
     parsedMove.toMove(this) map apply

@@ -38,10 +38,10 @@ case class Game(
     situation(parsedMove).map(applySituation(_))
 
   def apply(usi: shogi.format.usi.Usi, metrics: MoveMetrics): Validated[String, Game] =
-    apply(shogi.format.usi.Usi.toParsedMove(usi, situation), metrics)
+    situation(usi).map(applySituation(_, metrics))
 
   def apply(usi: shogi.format.usi.Usi): Validated[String, Game] =
-    apply(shogi.format.usi.Usi.toParsedMove(usi, situation))
+    situation(usi).map(applySituation(_))
 
   // TODO: remove Usi compatibility wrapper
   def usiMoves: shogi.format.usi.Usi.Moves = shogi.format.usi.Usi.Moves(moves)

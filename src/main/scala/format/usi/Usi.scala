@@ -2,6 +2,8 @@ package shogi
 package format
 package usi
 
+import cats.data.Validated
+import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 import shogi.format.forsyth.Sfen
 import shogi.variant.Variant
@@ -12,6 +14,7 @@ sealed trait Usi {
   def uci: String // will be removed
 
   def positions: List[Pos]
+  def toMove(sit: Situation): Validated[String, shogi.Move]
 
 }
 
@@ -85,6 +88,11 @@ object Usi {
 
     def apply(situation: Situation): shogi.Move = apply(situation.board.pieces)
 
+    def toMove(sit: Situation): Validated[String, shogi.Move] =
+      Validated.fromOption(sit.board(orig), s"No piece at $orig") map { p =>
+        PieceMove(sit.board, p, orig, dest, promotion)
+      }
+
     override def toString: String = usi
   }
 
@@ -111,6 +119,10 @@ object Usi {
 
     def apply(situation: Situation): shogi.Move = apply(situation.color)
 
+    def toMove(sit: Situation): Validated[String, shogi.Move] =
+      if (sit.variant.handRoles contains role) valid(PieceDrop(Piece(sit.color, role), pos))
+      else invalid(s"$role can't be dropped in ${sit.variant} shogi")
+
     override def toString: String = usi
   }
 
@@ -136,11 +148,6 @@ object Usi {
 
   def readList(moves: String): Option[Usis] =
     readList(moves.split(' ').toList)
-
-  def toParsedMove(usi: Usi, situation: Situation): ParsedMove = usi match {
-    case m: Usi.Move => KifMove(m.dest, m.orig, situation.board.pieces(m.orig).role, m.promotion)
-    case d: Usi.Drop => ParsedDrop(d.role, d.pos)
-  }
 
   implicit def toString(usi: Usi): String = usi.toString
 }

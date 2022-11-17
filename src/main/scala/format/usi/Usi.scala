@@ -34,8 +34,6 @@ object Usi {
   object Moves {
 
     // TODO: remove backward compatibility code
-    def apply(usi: Usi, situation: Situation): Moves = apply(List(usi), situation)
-
     def apply(usis: List[Usi], situation: Situation): Moves = Moves(
       Replay
         .situations(usis, situation)

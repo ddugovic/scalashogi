@@ -6,7 +6,7 @@ import shogi.variant.Variant
 object Binary {
 
   def decodeMove(bs: Seq[Byte], situation: Situation): Usi.Moves =
-    Usi.Moves(Reader.decode(bs, situation.variant, 1).head, situation)
+    decodeMoves(bs, situation, 1)
 
   def decodeMoves(bs: Seq[Byte], situation: Situation, nb: Int): Usi.Moves =
     Usi.Moves(Reader.decode(bs, situation.variant, nb), situation)

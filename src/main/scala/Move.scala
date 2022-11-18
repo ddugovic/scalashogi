@@ -16,6 +16,7 @@ case class PieceMove(
     capture: Boolean,
     promotion: Boolean = false
 ) extends Move {
+
   def withCapture(c: Boolean): PieceMove = copy(capture = c)
 
   def withPromotion(p: Boolean): PieceMove = copy(promotion = p)
@@ -34,6 +35,7 @@ case class PieceMove(
 }
 
 object PieceMove {
+
   def apply(pieces: PieceMap, orig: Pos, dest: Pos, promotion: Boolean): PieceMove =
     PieceMove(pieces(orig), orig, dest, pieces.contains(dest), promotion)
 
@@ -54,6 +56,7 @@ case class PieceDrop(
     piece: Piece,
     pos: Pos
 ) extends Move {
+
   def role: Role = piece.role
 
   def positions: List[Pos] = List(pos)
@@ -64,6 +67,7 @@ case class PieceDrop(
 }
 
 object PieceDrop {
+
   def apply(color: Color, role: Role, pos: Pos): PieceDrop =
     PieceDrop(Piece(color, role), pos)
 

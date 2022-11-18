@@ -3,7 +3,6 @@ package shogi
 import cats.data.Validated
 
 import shogi.format.forsyth.Sfen
-import shogi.format.ParsedMove
 
 case class Game(
     situation: Situation,
@@ -29,13 +28,6 @@ case class Game(
 
   def apply(move: Move): Game = applySituation(situation(move))
 
-  // TODO: For stability, introduce ParsedMove -> Usi conversion
-  def apply(parsedMove: ParsedMove, metrics: MoveMetrics): Validated[String, Game] =
-    situation(parsedMove).map(applySituation(_, metrics))
-
-  def apply(parsedMove: ParsedMove): Validated[String, Game] =
-    situation(parsedMove).map(applySituation(_))
-
   def apply(usi: shogi.format.usi.Usi, metrics: MoveMetrics): Validated[String, Game] =
     situation(usi).map(applySituation(_, metrics))
 
@@ -43,8 +35,7 @@ case class Game(
     situation(usi).map(applySituation(_))
 
   // TODO: remove Usi compatibility wrapper
-  def usiMoves: Moves = moves
-  def usis: Usis      = toUsis(moves)
+  def usis: Usis = toUsis(moves)
 
   def board = situation.board
 

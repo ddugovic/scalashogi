@@ -21,13 +21,13 @@ object Reader {
   }
 
   def fromParsedNotation(parsed: ParsedNotation, op: ParsedMoves => ParsedMoves): Result =
-    makeReplayFromParsedMoves(makeGame(parsed.tags), op(parsed.parsedMoves))
+    makeReplayFromUsis(makeGame(parsed.tags), op(parsed.parsedMoves))
 
   def fromParsedMoves(
       parsedMoves: ParsedMoves,
       tags: Tags
   ): Result =
-    makeReplayFromParsedMoves(makeGame(tags), parsedMoves)
+    makeReplayFromUsis(makeGame(tags), parsedMoves)
 
   def fromUsi(
       usis: Usis,
@@ -43,18 +43,6 @@ object Reader {
           .fold(
             err => Result.Incomplete(replay, err),
             game => Result.Complete(replay(game))
-          )
-      case (r: Result.Incomplete, _) => r
-    }
-
-  private def makeReplayFromParsedMoves(game: Game, parsedMoves: ParsedMoves): Result =
-    parsedMoves.toList.foldLeft[Result](Result.Complete(Replay(game))) {
-      case (Result.Complete(replay), parsedMove) =>
-        replay
-          .state(parsedMove)
-          .fold(
-            err => Result.Incomplete(replay, err),
-            situation => Result.Complete(Replay(game, situation))
           )
       case (r: Result.Incomplete, _) => r
     }

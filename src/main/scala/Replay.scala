@@ -38,14 +38,14 @@ object Replay {
     )
 
   def replay(
-      parsedMoves: ParsedMoves,
+      usis: Usis,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): Validated[String, Replay] =
-    parsedMoves.foldLeft[Validated[String, Replay]](valid(Replay(makeGame(initialSfen, variant)))) {
-      case (acc, parsedMove) =>
+    usis.foldLeft[Validated[String, Replay]](valid(Replay(makeGame(initialSfen, variant)))) {
+      case (acc, usi) =>
         acc andThen { replay =>
-          replay.state(parsedMove) andThen { game =>
+          replay.state(usi) andThen { game =>
             valid(replay(game))
           }
         }

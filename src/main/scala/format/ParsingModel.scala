@@ -4,6 +4,8 @@ package format
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 
+import shogi.format.usi.Usi
+
 case class ParsedNotation(
     initialPosition: InitialPosition,
     tags: Tags,
@@ -13,6 +15,8 @@ case class ParsedNotation(
 sealed trait ParsedMove {
 
   def toMove(sit: Situation): Validated[String, Move]
+
+  def usi: Usi
 
   def positions: List[Pos]
 
@@ -48,6 +52,8 @@ case class KifMove(
       PieceMove(sit.board, p, orig, dest, promotion)
     }
 
+  def usi: Usi = Usi.Move(orig, dest, promotion)
+
   def withMetas(m: Metas) = copy(metas = m)
 
   def positions = List(orig, dest)
@@ -67,6 +73,8 @@ case class CsaMove(
       PieceMove(sit.board, p, orig, dest, role != p.role)
     }
 
+  def usi: Usi = Usi.Move(orig, dest, promotion)
+
   def withMetas(m: Metas) = copy(metas = m)
 
   def positions = List(orig, dest)
@@ -83,6 +91,8 @@ case class ParsedDrop(
   def toMove(sit: Situation): Validated[String, Move] =
     if (sit.variant.handRoles contains role) valid(PieceDrop(Piece(sit.color, role), pos))
     else invalid(s"$role can't be dropped in ${sit.variant} shogi")
+
+  def usi: Usi = Usi.Drop(role, pos)
 
   def withMetas(m: Metas) = copy(metas = m)
 

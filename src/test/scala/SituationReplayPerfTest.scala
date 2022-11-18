@@ -1,6 +1,7 @@
 package shogi
 
 import format.usi._
+import shogi.variant.Standard
 
 class SituationReplayPerfTest extends ShogiTest {
 
@@ -9,9 +10,8 @@ class SituationReplayPerfTest extends ShogiTest {
   val nb         = 100
   val iterations = 10
 
-  val situation          = makeSituation
   val usis               = format.usi.Fixtures.prod500standard.take(nb).map(Usi.read(_).get)
-  def runOne(usis: Usis) = Replay.situations(usis, situation)
+  def runOne(usis: Usis) = Replay.situations(usis, None, Standard)
   def run() = { usis foreach runOne }
 
   "playing a game" should {

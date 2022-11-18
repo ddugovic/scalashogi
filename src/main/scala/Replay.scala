@@ -19,12 +19,12 @@ object Replay {
   def apply(game: Game) = new Replay(game, game)
 
   def apply(
-      usis: Usis,
+      moves: Moves,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): Reader.Result =
     Reader.fromUsi(
-      usis,
+      moves,
       Tags(
         List(
           initialSfen map { sfen =>
@@ -85,7 +85,7 @@ object Replay {
     situations(usis, init)
   }
 
-  def situations(
+  private def situations(
       usis: Usis,
       situation: Situation
   ): Validated[String, NonEmptyList[Situation]] =
@@ -110,14 +110,13 @@ object Replay {
       moves: Moves
   ): NonEmptyList[Situation] = situations(situation, moves.toList)
 
-  // TODO: rename variable usis to moves
   def situations(
-      usis: Moves,
+      moves: Moves,
       initialSfen: Option[Sfen],
       variant: shogi.variant.Variant
   ): NonEmptyList[Situation] = {
     val init = initialSfenToSituation(initialSfen, variant)
-    situations(init, usis)
+    situations(init, moves)
   }
 
   def usiWithRoleWhilePossible(

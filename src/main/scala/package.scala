@@ -1,5 +1,7 @@
 import ornicar.scalalib
 
+import cats.data.NonEmptyList
+
 package object shogi extends scalalib.Common with scalalib.OrnicarOption with scalalib.OrnicarBoolean {
 
   val Sente = Color.Sente
@@ -18,5 +20,7 @@ package object shogi extends scalalib.Common with scalalib.OrnicarOption with sc
   type Moves         = Vector[Move]
   type ParsedMoves   = List[format.ParsedMove]
   type Usis          = Vector[format.usi.Usi]
-  implicit def toUsis(moves: Moves): Usis = moves.map(_.usi)
+  implicit def toMoves(moves: NonEmptyList[Move]): Moves        = moves.toVector
+  implicit def toUsis(moves: Moves): Usis                       = moves.map(_.usi)
+  implicit def toUsis(usis: NonEmptyList[format.usi.Usi]): Usis = usis.toVector
 }

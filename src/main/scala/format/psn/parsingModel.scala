@@ -65,7 +65,6 @@ case class Std(
             _.dest == dest
           }.head
         }
-      // TODO: Illegal pawn, lance, knight dead zone non-promotion
       case (m, _) => m
     } match {
       case None => Validated invalid s"No move found: $this\n$situation"
@@ -77,6 +76,8 @@ case class Std(
           .isDefined && ((ranks contains move.dest.rank) || (ranks contains move.orig.rank))
         if (!move.promotion || promotionValid) Validated valid move
         else Validated invalid "Wrong promotion"
+        // There is not an easy way to differentiate
+        // "invalid unpromotion" from "wrong dest"
       }
     }
 

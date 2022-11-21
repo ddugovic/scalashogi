@@ -126,28 +126,28 @@ class PsnParserTest extends ShogiTest {
   "nags" in {
     parser(withNag) must beValid
 
-    parser("Rx3d+! $13") must beValid.like { case ParsedPsn(_, _, Sans(List(san))) =>
+    parser("Rx3d+! $13") must beValid.like { case ParsedPsn(_, _, Variation(List(san))) =>
       san.metas.glyphs.move must_== Option(Glyph.MoveAssessment.good)
       san.metas.glyphs.position must_== Option(Glyph.PositionAssessment.unclear)
     }
   }
 
   "non-nags" in {
-    parser("Bx2b?? ∞") must beValid.like { case ParsedPsn(_, _, Sans(List(san))) =>
+    parser("Bx2b?? ∞") must beValid.like { case ParsedPsn(_, _, Variation(List(san))) =>
       san.metas.glyphs.move must_== Option(Glyph.MoveAssessment.blunder)
       san.metas.glyphs.position must_== Option(Glyph.PositionAssessment.unclear)
     }
   }
 
   "comments" in {
-    parser("P-2d! {such a neat comment}") must beValid.like { case ParsedPsn(_, _, Sans(List(san))) =>
+    parser("P-2d! {such a neat comment}") must beValid.like { case ParsedPsn(_, _, Variation(List(san))) =>
       san.metas.comments must_== List("such a neat comment")
     }
   }
 
   "variations" in {
     parser("P-2d! {such a neat comment} (Px2d Bx2d)") must beValid.like {
-      case ParsedPsn(_, _, Sans(List(san))) =>
+      case ParsedPsn(_, _, Variation(List(san))) =>
         san.metas.variations.headOption must beSome.like { case variation =>
           variation.value must haveSize(2)
         }
@@ -155,7 +155,7 @@ class PsnParserTest extends ShogiTest {
   }
 
   "first move variation" in {
-    parser("1. P-2f (1. P-7f)") must beValid.like { case ParsedPsn(_, _, Sans(List(san))) =>
+    parser("1. P-2f (1. P-7f)") must beValid.like { case ParsedPsn(_, _, Variation(List(san))) =>
       san.metas.variations.headOption must beSome.like { case variation =>
         variation.value must haveSize(1)
       }

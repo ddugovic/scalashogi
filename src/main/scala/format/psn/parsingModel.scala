@@ -8,13 +8,13 @@ import cats.syntax.option._
 case class ParsedPsn(
     initialPosition: InitialPosition,
     tags: Tags,
-    sans: Sans
+    sans: Variation
 )
 
-case class Sans(value: List[San]) extends AnyVal
+case class Variation(value: List[San]) extends AnyVal
 
-object Sans {
-  val empty = Sans(Nil)
+object Variation {
+  val empty = Variation(Nil)
 }
 
 // Standard Algebraic Notation
@@ -28,7 +28,7 @@ sealed trait San {
 
   def withComments(s: List[String]): San = withMetas(metas withComments s)
 
-  def withVariations(s: List[Sans]): San = withMetas(metas withVariations s)
+  def withVariations(s: List[Variation]): San = withMetas(metas withVariations s)
 
   def mergeGlyphs(glyphs: Glyphs): San =
     withMetas(
@@ -109,14 +109,14 @@ case class InitialPosition(
 case class Metas(
     comments: List[String],
     glyphs: Glyphs,
-    variations: List[Sans]
+    variations: List[Variation]
 ) {
 
   def withGlyphs(g: Glyphs) = copy(glyphs = g)
 
   def withComments(c: List[String]) = copy(comments = c)
 
-  def withVariations(v: List[Sans]) = copy(variations = v)
+  def withVariations(v: List[Variation]) = copy(variations = v)
 }
 
 object Metas {

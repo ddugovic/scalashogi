@@ -25,13 +25,13 @@ object Parser {
         invalid(showExpectations("Cannot parse psn", psn, err))
     }
 
-  def moves(str: String): Validated[String, Sans] =
+  def moves(str: String): Validated[String, Variation] =
     MovesParser.moves(str)
 
-  def moves(strMoves: Iterable[String]): Validated[String, Sans] =
+  def moves(strMoves: Iterable[String]): Validated[String, Variation] =
     strMoves.toList
       .traverse(MovesParser.move)
-      .map(Sans(_))
+      .map(Variation(_))
 
   def move(str: String): Validated[String, San] = MovesParser.move(str)
 
@@ -39,8 +39,8 @@ object Parser {
 
     private def cleanComments(comments: List[String]) = comments.map(_.trim).filter(_.nonEmpty)
 
-    def moves(str: String): Validated[String, Sans] =
-      strMove.rep.map(xs => Sans(xs.toList)).parse(str) match {
+    def moves(str: String): Validated[String, Variation] =
+      strMove.rep.map(xs => Variation(xs.toList)).parse(str) match {
         case Right((_, str)) =>
           valid(str)
         case Left(err) => invalid(showExpectations("Cannot parse moves", str, err))
@@ -121,9 +121,9 @@ object Parser {
 
     val strMove: P[San] = P
       .recursive[San] { recuse =>
-        val variation: P[Sans] =
+        val variation: P[Variation] =
           (((P.char('(') <* escape) *> recuse.rep0 <* (P.char(')') ~ escape)) <* escape)
-            .map(Sans(_))
+            .map(Variation(_))
 
         ((number.backtrack | (commentary <* escape)).rep0 ~ forbidNullMove).with1 *>
           (((MoveParser.moveWithGlyphs ~ nagGlyphs ~ commentary.rep0 ~ nagGlyphs ~ variation.rep0) <* moveExtras.rep0) <* escape).backtrack
@@ -220,11 +220,11 @@ object Parser {
       case (optionalTags, optionalMoves) => {
         val preTags = Tags(optionalTags.map(_.toList).getOrElse(List()))
         optionalMoves match {
-          case None => ParsedPsn(InitialPosition(List()), preTags, Sans(List()))
+          case None => ParsedPsn(InitialPosition(List()), preTags, Variation(List()))
           case Some((init, sans, resultOption)) => {
             val tags =
               resultOption.filterNot(_ => preTags.exists(_.Result)).foldLeft(preTags)(_ + Tag(_.Result, _))
-            ParsedPsn(init, tags, Sans(sans))
+            ParsedPsn(init, tags, Variation(sans))
           }
         }
       }

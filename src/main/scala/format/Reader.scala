@@ -56,20 +56,28 @@ object Reader {
     )
 
   def full(pgn: String, tags: Tags = Tags.empty): Validated[String, Result] =
-    fullWithSans(pgn, identity, tags)
+    fullWithVariation(pgn, identity, tags)
 
   def moves(moveStrs: Iterable[String], tags: Tags): Validated[String, Result] =
-    movesWithSans(moveStrs, identity, tags)
+    movesWithVariation(moveStrs, identity, tags)
 
-  def fullWithSans(pgn: String, op: Sans => Sans, tags: Tags = Tags.empty): Validated[String, Result] =
+  def fullWithVariation(
+      pgn: String,
+      op: Variation => Variation,
+      tags: Tags = Tags.empty
+  ): Validated[String, Result] =
     Parser.full(cleanUserInput(pgn)) map { parsed =>
       makeReplay(makeGame(parsed.tags ++ tags), op(parsed.sans))
     }
 
-  def fullWithSans(parsed: ParsedPsn, op: Sans => Sans): Result =
+  def fullWithVariation(parsed: ParsedPsn, op: Variation => Variation): Result =
     makeReplay(makeGame(parsed.tags), op(parsed.sans))
 
-  def movesWithSans(moveStrs: Iterable[String], op: Sans => Sans, tags: Tags): Validated[String, Result] =
+  def movesWithVariation(
+      moveStrs: Iterable[String],
+      op: Variation => Variation,
+      tags: Tags
+  ): Validated[String, Result] =
     Parser.moves(moveStrs) map { moves =>
       makeReplay(makeGame(tags), op(moves))
     }
@@ -77,7 +85,7 @@ object Reader {
   // remove invisible byte order mark
   def cleanUserInput(str: String) = str.replace(s"\ufeff", "")
 
-  private def makeReplay(game: Game, sans: Sans): Result =
+  private def makeReplay(game: Game, sans: Variation): Result =
     sans.value.foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), san) =>
         san(replay.state.situation).fold(

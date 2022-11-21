@@ -2,33 +2,26 @@ package shogi
 package format
 package psn
 
-import cats.implicits._
-
 case class Psn(
     tags: Tags,
     turns: List[Turn],
     initial: Initial = Initial.empty
 ) {
 
-  def updateTurn(fullMove: Int, f: Turn => Turn) = {
-    val index = fullMove - 1
+  def updateTurn(ply: Int, f: Turn => Turn) = {
+    val index = ply - 1
     (turns lift index).fold(this) { turn =>
       copy(turns = turns.updated(index, f(turn)))
     }
   }
   def updatePly(ply: Int, f: Move => Move) = {
-    val fullMove = (ply + 1) / 2
-    val color    = Color.fromPly(ply - 1)
-    updateTurn(fullMove, _.update(color, f))
+    updateTurn(ply, _.update(f))
   }
   def updateLastPly(f: Move => Move) = updatePly(nbPlies, f)
 
-  def nbPlies = turns.foldLeft(0)(_ + _.count)
+  def nbPlies = turns.size
 
-  def moves =
-    turns.flatMap { t =>
-      List(t.sente, t.gote).flatten
-    }
+  def moves = turns.map { _.move }
 
   def withEvent(title: String) =
     copy(
@@ -57,53 +50,15 @@ object Initial {
   val empty = Initial(Nil)
 }
 
+// TODO: Prefer List[Move] instead of List[Turn]
 case class Turn(
     number: Int,
-    sente: Option[Move],
-    gote: Option[Move]
+    move: Move
 ) {
 
-  def update(color: Color, f: Move => Move) =
-    color.fold(
-      copy(sente = sente map f),
-      copy(gote = gote map f)
-    )
+  def update(f: Move => Move) = copy(move = f(move))
 
-  def updateLast(f: Move => Move) = {
-    gote.map(m => copy(gote = f(m).some)) orElse
-      sente.map(m => copy(sente = f(m).some))
-  } | this
-
-  def isEmpty = sente.isEmpty && gote.isEmpty
-
-  def plyOf(color: Color) = number * 2 - color.fold(1, 0)
-
-  def count = List(sente, gote) count (_.isDefined)
-
-  override def toString = {
-    val text = (sente, gote) match {
-      case (Some(w), Some(b)) if w.isLong => s" $w $number... $b"
-      case (Some(w), Some(b))             => s" $w $b"
-      case (Some(w), None)                => s" $w"
-      case (None, Some(b))                => s".. $b"
-      case _                              => ""
-    }
-    s"$number.$text"
-  }
-}
-
-object Turn {
-
-  def fromMoves(moves: List[Move], ply: Int): List[Turn] = {
-    moves.foldLeft((List[Turn](), ply)) {
-      case ((turns, p), move) if p % 2 == 1 =>
-        (Turn((p + 1) / 2, move.some, none) :: turns) -> (p + 1)
-      case ((Nil, p), move) =>
-        (Turn((p + 1) / 2, none, move.some) :: Nil) -> (p + 1)
-      case ((t :: tt, p), move) =>
-        (t.copy(gote = move.some) :: tt) -> (p + 1)
-    }
-  }._1.reverse
+  override def toString = s"$number. $move"
 }
 
 case class Move(

@@ -2,8 +2,6 @@ package shogi
 package format
 package psn
 
-import cats.syntax.option._
-
 class RenderTest extends ShogiTest {
 
   private def glyphs(id: Int) =
@@ -47,39 +45,54 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
         turns = List(
           Turn(
             number = 1,
-            sente = Move("d4").some,
-            gote = Move("d5").some
+            move = Move("d4")
           ),
           Turn(
             number = 2,
-            sente = Move("c4", glyphs = glyphs(1)).some,
-            gote = Move("c6", glyphs = glyphs(2)).some
+            move = Move("d5")
           ),
           Turn(
             number = 3,
-            sente = Move("Nc3", glyphs = glyphs(3)).some,
-            gote = Move("Nf6").some
+            move = Move("c4", glyphs = glyphs(1))
           ),
           Turn(
             number = 4,
-            sente = Move(
-              "cxd5",
-              comments =
-                "The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one" :: Nil
-            ).some,
-            gote = Move("cxd5").some
+            move = Move("c6", glyphs = glyphs(2))
           ),
           Turn(
             number = 5,
-            sente = Move("Bf4").some,
-            gote = Move("Nc6").some
+            move = Move("Nc3", glyphs = glyphs(3))
+          ),
+          Turn(
+            number = 6,
+            move = Move("Nf6")
+          ),
+          Turn(
+            number = 7,
+            move = Move(
+              "cxd5",
+              comments =
+                "The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one" :: Nil
+            )
+          ),
+          Turn(
+            number = 8,
+            move = Move("cxd5")
+          ),
+          Turn(
+            number = 9,
+            move = Move("Bf4")
+          ),
+          Turn(
+            number = 10,
+            move = Move("Nc6")
           )
         )
       )
       psn.toString must_== """[Sente "Kramnik,V"]
 [Gote "Anand,V"]
 
-1. d4 d5 2. c4! c6? 3. Nc3!! Nf6 4. cxd5 { The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one } 4... cxd5 5. Bf4 Nc6"""
+1. d4 2. d5 3. c4! 4. c6? 5. Nc3!! 6. Nf6 7. cxd5 { The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one } 8. cxd5 9. Bf4 10. Nc6"""
     }
     "be correct with variations" in {
       val psn = Psn(
@@ -87,34 +100,35 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
         turns = List(
           Turn(
             number = 1,
-            sente = Move(
+            move = Move(
               "d4",
               variations = List(
                 List(
                   Turn(
                     number = 1,
-                    sente = Move("e4").some,
-                    gote = None
+                    move = Move("e4")
                   )
                 )
               )
-            ).some,
-            gote = Move(
+            )
+          ),
+          Turn(
+            number = 2,
+            move = Move(
               "Nf6",
               variations = List(
                 List(
                   Turn(
-                    number = 1,
-                    sente = None,
-                    gote = Move("d5").some
+                    number = 2,
+                    move = Move("d5")
                   )
                 )
               )
-            ).some
+            )
           )
         )
       )
-      psn.toString must_== """1. d4 (1. e4) 1... Nf6 (1... d5)"""
+      psn.toString must_== """1. d4 (1. e4) 2. Nf6 (2. d5)"""
     }
     "result only" in {
       val psn = Psn(
@@ -166,30 +180,31 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
         turns = List(
           Turn(
             number = 1,
-            sente = Move(
+            move = Move(
               "d4",
               variations = List(
                 List(
                   Turn(
                     number = 1,
-                    sente = Move("e4").some,
-                    gote = None
+                    move = Move("e4")
                   )
                 )
               )
-            ).some,
-            gote = Move(
+            )
+          ),
+          Turn(
+            number = 2,
+            move = Move(
               "Nf6",
               variations = List(
                 List(
                   Turn(
-                    number = 1,
-                    sente = None,
-                    gote = Move("d5").some
+                    number = 2,
+                    move = Move("d5")
                   )
                 )
               )
-            ).some
+            )
           )
         ),
         initial = Initial(
@@ -200,7 +215,7 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
         )
       )
       psn.toString must_== """{ Why hello there! } { The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one }
-1. d4 (1. e4) 1... Nf6 (1... d5)"""
+1. d4 (1. e4) 2. Nf6 (2. d5)"""
     }
   }
 

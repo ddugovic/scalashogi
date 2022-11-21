@@ -31,6 +31,7 @@ trait Notation {
   override def toString = render
 }
 
+// TODO: define type Comments as List[String]
 case class Initial(comments: List[String] = Nil)
 
 object Initial {
@@ -48,8 +49,4 @@ case class NotationMove(
     secondsSpent: Option[Int] = None,
     // total time spent playing so far
     secondsTotal: Option[Int] = None
-) {
-  // TODO: remove backward compatibility code
-  def usiWithRole = move
-  def usi         = move.usi
-}
+)

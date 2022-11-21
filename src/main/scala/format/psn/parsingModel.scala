@@ -67,18 +67,8 @@ case class Move(
         }
       case (m, _) => m
     } match {
-      case None => Validated invalid s"No move found: $this\n$situation"
-      case Some(move) => {
-        lazy val piece = situation.board(move.orig).get
-        lazy val ranks = situation.variant.promotionRanks(situation.color)
-        lazy val promotionValid = situation.variant
-          .promote(piece.role)
-          .isDefined && ((ranks contains move.dest.rank) || (ranks contains move.orig.rank))
-        if (!move.promotion || promotionValid) Validated valid move
-        else Validated invalid "Wrong promotion"
-        // There is not an easy way to differentiate
-        // "invalid unpromotion" from "wrong dest"
-      }
+      case None       => Validated invalid s"No move found: $this\n$situation"
+      case Some(move) => Validated valid move
     }
 
   private def compare[A](a: Option[A], b: A) = a.fold(true)(b ==)

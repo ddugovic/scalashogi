@@ -14,21 +14,14 @@ case class Psn(
       copy(turns = turns.updated(index, f(turn)))
     }
   }
-  def updatePly(ply: Int, f: Move => Move) = {
-    updateTurn(ply, _.update(f))
-  }
-  def updateLastPly(f: Move => Move) = updatePly(nbPlies, f)
-
-  def nbPlies = turns.size
-
-  def moves = turns.map { _.move }
+  def updateLastPly(f: Turn => Turn) = updateTurn(turns.size, f)
 
   def withEvent(title: String) =
     copy(
       tags = tags + Tag(_.Event, title)
     )
 
-  def render: String = {
+  override def toString: String = {
     val tagsStr = tags.toPSNString
     val initStr =
       if (initial.comments.nonEmpty) initial.comments.mkString("{ ", " } { ", " }\n")
@@ -40,8 +33,6 @@ case class Psn(
       else resultStr
     s"$tagsStr\n\n$initStr$turnStr$endStr"
   }.trim
-
-  override def toString = render
 }
 
 case class Initial(comments: List[String] = Nil)
@@ -50,18 +41,8 @@ object Initial {
   val empty = Initial(Nil)
 }
 
-// TODO: Prefer List[Move] instead of List[Turn]
 case class Turn(
     number: Int,
-    move: Move
-) {
-
-  def update(f: Move => Move) = copy(move = f(move))
-
-  override def toString = s"$number. $move"
-}
-
-case class Move(
     san: String,
     comments: List[String] = Nil,
     glyphs: Glyphs = Glyphs.empty,
@@ -75,7 +56,7 @@ case class Move(
   def isLong = comments.nonEmpty || variations.nonEmpty || secondsLeft.isDefined
 
   private def clockString: Option[String] =
-    secondsLeft.map(seconds => "[%clk " + Move.formatPsnSeconds(seconds) + "]")
+    secondsLeft.map(seconds => "[%clk " + Turn.formatPsnSeconds(seconds) + "]")
 
   override def toString = {
     val glyphStr = glyphs.toList.map {
@@ -85,7 +66,7 @@ case class Move(
     val commentsOrTime =
       if (comments.nonEmpty || secondsLeft.isDefined || opening.isDefined || result.isDefined)
         List(clockString, opening, result).flatten
-          .:::(comments map Move.noDoubleLineBreak)
+          .:::(comments map Turn.noDoubleLineBreak)
           .map { text =>
             s" { $text }"
           }
@@ -94,11 +75,11 @@ case class Move(
     val variationString =
       if (variations.isEmpty) ""
       else variations.map(_.mkString(" (", " ", ")")).mkString(" ")
-    s"$san$glyphStr$commentsOrTime$variationString"
+    s"$number. $san$glyphStr$commentsOrTime$variationString"
   }
 }
 
-object Move {
+object Turn {
 
   private val noDoubleLineBreakRegex = "(\r?\n){2,}".r
 

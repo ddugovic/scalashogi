@@ -7,7 +7,7 @@ class RoundtripTest extends ShogiTest {
   "tags" should {
     "roundtrip with special chars" in {
       val value = "aä\\\"'$%/°á \t\b \"\\\\/"
-      Parser.full(Psn(tags = Tags(List(Tag(_.Site, value))), turns = List()).toString) must beValid.like {
+      Parser.full(Psn(tags = Tags(List(Tag(_.Site, value))), turns = List.empty).toString) must beValid.like {
         case parsed =>
           parsed.tags("Site") must_== Some(value)
       }

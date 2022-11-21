@@ -45,47 +45,48 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
         turns = List(
           Turn(
             number = 1,
-            move = Move("d4")
+            san = "d4"
           ),
           Turn(
             number = 2,
-            move = Move("d5")
+            san = "d5"
           ),
           Turn(
             number = 3,
-            move = Move("c4", glyphs = glyphs(1))
+            san = "c4",
+            glyphs = glyphs(1)
           ),
           Turn(
             number = 4,
-            move = Move("c6", glyphs = glyphs(2))
+            san = "c6",
+            glyphs = glyphs(2)
           ),
           Turn(
             number = 5,
-            move = Move("Nc3", glyphs = glyphs(3))
+            san = "Nc3",
+            glyphs = glyphs(3)
           ),
           Turn(
             number = 6,
-            move = Move("Nf6")
+            san = "Nf6"
           ),
           Turn(
             number = 7,
-            move = Move(
-              "cxd5",
-              comments =
-                "The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one" :: Nil
-            )
+            san = "cxd5",
+            comments =
+              "The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one" :: Nil
           ),
           Turn(
             number = 8,
-            move = Move("cxd5")
+            san = "cxd5"
           ),
           Turn(
             number = 9,
-            move = Move("Bf4")
+            san = "Bf4"
           ),
           Turn(
             number = 10,
-            move = Move("Nc6")
+            san = "Nc6"
           )
         )
       )
@@ -100,28 +101,24 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
         turns = List(
           Turn(
             number = 1,
-            move = Move(
-              "d4",
-              variations = List(
-                List(
-                  Turn(
-                    number = 1,
-                    move = Move("e4")
-                  )
+            san = "d4",
+            variations = List(
+              List(
+                Turn(
+                  number = 1,
+                  san = "e4"
                 )
               )
             )
           ),
           Turn(
             number = 2,
-            move = Move(
-              "Nf6",
-              variations = List(
-                List(
-                  Turn(
-                    number = 2,
-                    move = Move("d5")
-                  )
+            san = "Nf6",
+            variations = List(
+              List(
+                Turn(
+                  number = 2,
+                  san = "d5"
                 )
               )
             )
@@ -180,28 +177,24 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
         turns = List(
           Turn(
             number = 1,
-            move = Move(
-              "d4",
-              variations = List(
-                List(
-                  Turn(
-                    number = 1,
-                    move = Move("e4")
-                  )
+            san = "d4",
+            variations = List(
+              List(
+                Turn(
+                  number = 1,
+                  san = "e4"
                 )
               )
             )
           ),
           Turn(
             number = 2,
-            move = Move(
-              "Nf6",
-              variations = List(
-                List(
-                  Turn(
-                    number = 2,
-                    move = Move("d5")
-                  )
+            san = "Nf6",
+            variations = List(
+              List(
+                Turn(
+                  number = 2,
+                  san = "d5"
                 )
               )
             )

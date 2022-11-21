@@ -13,9 +13,9 @@ import cats.data.NonEmptyList
 object Parser {
 
   val whitespace = R.cr | R.lf | R.wsp
-  val psnComment = P.caret.filter(_.col == 0) *> P.char('%') *> P.until(P.char('\n')).void
-  // psnComment with % or whitespaces
-  val escape = psnComment.? *> whitespace.rep0.?
+  val comment    = P.caret.filter(_.col == 0) *> P.char('%') *> P.until(P.char('\n')).void
+  // comment with % or whitespaces
+  val escape = comment.? *> whitespace.rep0.?
 
   def full(psn: String): Validated[String, ParsedPsn] =
     psnParser.parse(psn) match {
@@ -108,10 +108,10 @@ object Parser {
     val positiveIntString: P[String] =
       (N.nonZeroDigit ~ N.digits0).string
 
-    // '. ' or '... ' or '. ... '
-    val numberSuffix = (P.char('.') | whitespace).rep0.void
+    // Delimit with period and/or whitespace
+    val numberSuffix = (P.char('.') | whitespace).rep.void
 
-    // 10. or 10... but not 0 or 1-0 or 1/2
+    // 10 or 10. but not 0 or 1-0 or 1/2
     val number = (positiveIntString <* !P.charIn('‑', '–', '-', '/') ~ numberSuffix).string
 
     val forbidNullMove =
@@ -168,17 +168,17 @@ object Parser {
     val plus = P.charIn("+=").?.map(_.getOrElse('=').equals('+'))
 
     // G-5b
-    val ambiguous: P[Std] = (role ~ x ~ dest ~ plus).map { case (((ro, ca), de), pr) =>
-      Std(dest = de, role = ro, capture = ca, promotion = pr)
+    val ambiguous: P[Move] = (role ~ x ~ dest ~ plus).map { case (((ro, ca), de), pr) =>
+      Move(dest = de, role = ro, capture = ca, promotion = pr)
     }
 
     // G@5b
-    val drop: P[Drp] = ((role <* P.charIn("@'*")) ~ dest).map { case (role, pos) => Drp(role, pos) }
+    val drop: P[Drop] = ((role <* P.charIn("@'*")) ~ dest).map { case (role, pos) => Drop(role, pos) }
 
     // G6-5b G6x5b Ga-5b Gax5b G6a-5b G6ax5b
-    val disambiguated: P[Std] = (role ~ file.? ~ rank.? ~ x ~ dest ~ plus).map {
+    val disambiguated: P[Move] = (role ~ file.? ~ rank.? ~ x ~ dest ~ plus).map {
       case (((((ro, fi), ra), ca), de), pr) =>
-        Std(dest = de, role = ro, capture = ca, file = fi, rank = ra, promotion = pr)
+        Move(dest = de, role = ro, capture = ca, file = fi, rank = ra, promotion = pr)
     }
 
     val standard: P[San] = P.oneOf(

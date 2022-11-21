@@ -11,18 +11,18 @@ class PsnParserTest extends ShogiTest {
   val parser    = Parser.full _
   val parseMove = Parser.move _
 
-  "psnComment" should {
+  "comment" should {
     "parse valid comment" in {
-      Parser.psnComment.parse("% comment") must beRight
+      Parser.comment.parse("% comment") must beRight
     }
     "parse invalid comment" in {
-      Parser.psnComment.parse("  %comment") must beLeft
+      Parser.comment.parse("  %comment") must beLeft
     }
   }
 
   "pawn move" should {
     "P-2f" in {
-      parseMove("P-2f") must beValid.like { case san: Std =>
+      parseMove("P-2f") must beValid.like { case san: Move =>
         san.promotion must beFalse
       }
     }
@@ -31,28 +31,28 @@ class PsnParserTest extends ShogiTest {
   "promotion check" should {
     "promote (no capture)" in {
       parser("N-5c+ ") must beValid.like { case a =>
-        a.sans.value.headOption must beSome.like { case san: Std =>
+        a.sans.value.headOption must beSome.like { case san: Move =>
           san.promotion must beTrue
         }
       }
     }
     "promote (capture)" in {
       parser("Nx5c+ ") must beValid.like { case a =>
-        a.sans.value.headOption must beSome.like { case san: Std =>
+        a.sans.value.headOption must beSome.like { case san: Move =>
           san.promotion must beTrue
         }
       }
     }
     "unpromote (no capture)" in {
       parser("N-5c= ") must beValid.like { case a =>
-        a.sans.value.headOption must beSome.like { case san: Std =>
+        a.sans.value.headOption must beSome.like { case san: Move =>
           san.promotion must beFalse
         }
       }
     }
     "unpromote (capture)" in {
       parser("Nx5c= ") must beValid.like { case a =>
-        a.sans.value.headOption must beSome.like { case san: Std =>
+        a.sans.value.headOption must beSome.like { case san: Move =>
           san.promotion must beFalse
         }
       }
@@ -94,29 +94,29 @@ class PsnParserTest extends ShogiTest {
   }
 
   "glyphs" in {
-    parseMove("P-2f") must beValid.like { case a: Std =>
-      a must_== Std(Pos.SQ2F, Pawn)
+    parseMove("P-2f") must beValid.like { case a: Move =>
+      a must_== Move(Pos.SQ2F, Pawn)
     }
-    parseMove("P-2f!") must beValid.like { case a: Std =>
+    parseMove("P-2f!") must beValid.like { case a: Move =>
       a.dest === Pos.SQ2F
       a.role === Pawn
       a.metas.glyphs === Glyphs(Glyph.MoveAssessment.good.some, None, Nil)
     }
-    parseMove("G6a-5b?!") must beValid.like { case a: Std =>
+    parseMove("G6a-5b?!") must beValid.like { case a: Move =>
       a.file === Some(6)
       a.rank === Some(1)
       a.dest === Pos.SQ5B
       a.role === Gold
       a.metas.glyphs === Glyphs(Glyph.MoveAssessment.dubious.some, None, Nil)
     }
-    parseMove("G4a-5b!") must beValid.like { case a: Std =>
+    parseMove("G4a-5b!") must beValid.like { case a: Move =>
       a.file === Some(4)
       a.rank === Some(1)
       a.dest === Pos.SQ5B
       a.role === Gold
       a.metas.glyphs === Glyphs(Glyph.MoveAssessment.good.some, None, Nil)
     }
-    parseMove("P@2g?!") must beValid.like { case a: Drp =>
+    parseMove("P@2g?!") must beValid.like { case a: Drop =>
       a.dest === Pos.SQ2G
       a.role === Pawn
       a.metas.glyphs === Glyphs(Glyph.MoveAssessment.dubious.some, None, Nil)

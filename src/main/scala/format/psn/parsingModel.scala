@@ -36,7 +36,7 @@ sealed trait San {
     )
 }
 
-case class Std(
+case class Move(
     dest: Pos,
     role: Role,
     capture: Boolean = false,
@@ -84,7 +84,7 @@ case class Std(
   private def compare[A](a: Option[A], b: A) = a.fold(true)(b ==)
 }
 
-case class Drp(
+case class Drop(
     role: Role,
     dest: Pos,
     metas: Metas = Metas.empty

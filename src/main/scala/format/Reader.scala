@@ -94,4 +94,6 @@ object Reader {
         )
       case (r: Result.Incomplete, _) => r
     }
+
+  implicit def toUsis(parsedMoves: ParsedMoves): Usis = parsedMoves.toVector.map(_.usi)
 }

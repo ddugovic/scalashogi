@@ -23,5 +23,4 @@ package object shogi extends scalalib.Common with scalalib.OrnicarOption with sc
   implicit def toMoves(moves: NonEmptyList[Move]): Moves        = moves.toVector
   implicit def toUsis(moves: Moves): Usis                       = moves.map(_.usi)
   implicit def toUsis(usis: NonEmptyList[format.usi.Usi]): Usis = usis.toVector
-  implicit def toUsis(parsedMoves: ParsedMoves): Usis           = parsedMoves.toVector.map(_.usi)
 }

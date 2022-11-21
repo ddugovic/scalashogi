@@ -24,8 +24,7 @@ case class Situation(
   def apply(usi: shogi.format.usi.Usi): Validated[String, Situation] =
     usi.toMove(this) map apply
 
-  def apply(parsedMove: ParsedMove): Validated[String, Situation] =
-    parsedMove.toMove(this) map apply
+  def apply(parsedMove: ParsedMove): Validated[String, Situation] = apply(parsedMove.usi)
 
   // Moves
 

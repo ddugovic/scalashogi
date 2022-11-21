@@ -5,7 +5,7 @@ import Pos._
 
 class DumperTest extends ShogiTest {
 
-  /*val outebisha = makeGame.playMoves(
+  val outebisha = makeGame(
     (SQ7G, SQ7F, false),
     (SQ3C, SQ3D, false),
     (SQ7F, SQ7E, false),
@@ -26,11 +26,11 @@ class DumperTest extends ShogiTest {
     "move list" in {
       "outebisha" in {
         Dumper(outebisha) must_== "P-7f P-3d P-7e P-8d R-7h P-8e K-4h P-8f Px8f Rx8f P-7d Px7d Bx2b+ Sx2b"
-            .split(' ')
-            .toList
+          .split(' ')
+          .toList
       }
     }
-  }*/
+  }
 
   "ambiguous moves" should {
     "ambiguous file only" in {

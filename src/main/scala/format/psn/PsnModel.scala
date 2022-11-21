@@ -19,7 +19,7 @@ case class Psn(
     val initStr =
       if (initial.comments.nonEmpty) initial.comments.mkString("{ ", " } { ", " }\n")
       else ""
-    val turnStr   = moves mkString " "
+    val turnStr   = moves map Psn.renderNotationMove mkString " "
     val resultStr = tags(_.Result) | ""
     val endStr =
       if (turnStr.nonEmpty) s" $resultStr"

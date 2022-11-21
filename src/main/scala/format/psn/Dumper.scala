@@ -1,11 +1,15 @@
 package shogi
 package format.psn
 
+import cats.implicits._
+
 object Dumper {
 
   def apply(game: Game): List[String] = {
+    val initialSfen = game.situation.history.initialSfen
+    val situation   = Game(game.variant.some, initialSfen).situation
     Replay
-      .situations(game.situation, game.moves)
+      .situations(situation, game.moves)
       .toList
       .sliding(2)
       .map { pair =>

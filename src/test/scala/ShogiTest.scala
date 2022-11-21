@@ -42,14 +42,12 @@ trait ShogiTest extends Specification with ValidatedMatchers {
 
     def as(color: Color): Game = game.withColor(color)
 
-    // moves can be a simple sequence
     def apply(moves: (Pos, Pos, Boolean)*): Game =
       moves.foldLeft[Game](game) { case (g, (orig, dest, prom)) =>
         g(PieceMove(g.situation, orig, dest, prom))
       }
 
-    // moves can be any sort of IterableOnce, including List
-    def apply(moves: IterableOnce[(Pos, Pos, Boolean)]): Game =
+    def apply(moves: List[(Pos, Pos, Boolean)]): Game =
       moves.iterator.foldLeft[Game](game) { case (g, (orig, dest, prom)) =>
         g(PieceMove(g.situation, orig, dest, prom))
       }

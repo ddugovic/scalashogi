@@ -5,6 +5,7 @@ import cats.implicits._
 
 import shogi.format.forsyth.Sfen
 import shogi.format.ParsedMove
+import shogi.format.usi.Usi
 import shogi.variant.Variant
 
 case class Situation(
@@ -21,8 +22,18 @@ case class Situation(
       case drop: PieceDrop => variant.applyDrop(this, drop)
     }
 
-  def apply(usi: shogi.format.usi.Usi): Validated[String, Situation] =
-    usi.toMove(this) map apply
+  def apply(usi: Usi): Validated[String, Situation] = {
+    val move: Validated[String, Move] = usi match {
+      case Usi.Move(orig, dest, promotion) =>
+        Validated.fromOption(board(orig), s"No piece at $orig") map {
+          PieceMove(board, _, orig, dest, promotion)
+        }
+      case Usi.Drop(role, dest) =>
+        if (variant.handRoles contains role) Validated.valid(PieceDrop(Piece(color, role), dest))
+        else Validated.invalid(s"$color cannot drop $role in this $variant situation")
+    }
+    move map apply
+  }
 
   def apply(parsedMove: ParsedMove): Validated[String, Situation] = apply(parsedMove.usi)
 

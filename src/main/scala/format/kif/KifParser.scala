@@ -122,7 +122,7 @@ object KifParser {
                 }
                 if (uselessTimes) m1 else m1 withTimeSpent timeSpent withTimeTotal timeTotal
               } match {
-                case Valid(move)  => mk(move :: parsedMoves, rest, move.positions.lastOption, ply + 1)
+                case Valid(move)  => mk(move :: parsedMoves, rest, move.usi.dest.some, ply + 1)
                 case Invalid(err) => invalid(err)
               }
             }
@@ -380,16 +380,16 @@ object KifParser {
               timeTotal = None
             )
           )
-        case DropRegex(posS, roleS) =>
+        case DropRegex(destS, roleS) =>
           for {
             role <- Role.allByEverything get roleS toValid s"Unknown role in drop: $str"
             _ <-
               if (variant.handRoles contains role) valid(role)
               else invalid(s"$role can't be dropped in $variant variant")
-            pos <- Pos.allNumberKeys get posS toValid s"Cannot parse destination square in drop: $str"
+            dest <- Pos.allNumberKeys get destS toValid s"Cannot parse destination square in drop: $str"
           } yield ParsedDrop(
             role = role,
-            pos = pos,
+            dest = dest,
             metas = Metas(
               comments = Nil,
               glyphs = Glyphs.empty,

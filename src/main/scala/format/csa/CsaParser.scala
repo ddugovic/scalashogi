@@ -207,16 +207,16 @@ object CsaParser {
             )
           )
         }
-        case DropRegex(posS, roleS) =>
+        case DropRegex(destS, roleS) =>
           for {
             role <- Role.allByCsa get roleS toValid s"Unknown role in drop: $str"
             _ <-
               if (Standard.handRoles contains role) valid(role)
               else invalid(s"$role can't be dropped in standard shogi")
-            pos <- Pos.allNumberKeys get posS toValid s"Cannot parse destination square in drop: $str"
+            dest <- Pos.allNumberKeys get destS toValid s"Cannot parse destination square in drop: $str"
           } yield ParsedDrop(
             role = role,
-            pos = pos,
+            dest = dest,
             metas = Metas(
               comments = Nil,
               glyphs = Glyphs.empty,

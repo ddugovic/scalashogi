@@ -14,7 +14,7 @@ class KifParserTest extends ShogiTest {
   "drop" in {
     parseMove("６四歩打") must beValid.like { case d: ParsedDrop =>
       d.role must_== Pawn
-      d.pos must_== Pos.SQ6D
+      d.dest must_== Pos.SQ6D
     }
   }
 
@@ -42,7 +42,7 @@ class KifParserTest extends ShogiTest {
       parser("７四歩打") must beValid.like { case p =>
         p.parsedMoves.headOption must beSome.like { case d: ParsedDrop =>
           d.role must_== Pawn
-          d.pos must_== Pos.SQ7D
+          d.dest must_== Pos.SQ7D
         }
       }
     }

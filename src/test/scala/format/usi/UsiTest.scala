@@ -21,7 +21,7 @@ class UsiTest extends ShogiTest {
     }
     Usi("G*8b") must beSome.like { case u: Usi.Drop =>
       u.role must_== Gold
-      u.pos must_== SQ8B
+      u.dest must_== SQ8B
       u.usi must_== "G*8b"
     }
   }

@@ -13,8 +13,6 @@ sealed trait ParsedMove {
 
   def usi: Usi
 
-  def positions: List[Pos]
-
   def metas: Metas
 
   def withMetas(m: Metas): ParsedMove
@@ -46,8 +44,6 @@ case class KifMove(
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def positions = List(orig, dest)
-
 }
 
 case class CsaMove(
@@ -62,22 +58,19 @@ case class CsaMove(
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def positions = List(orig, dest)
-
 }
 
 // All notations can share drop
 case class ParsedDrop(
     role: Role,
-    pos: Pos,
+    dest: Pos,
     metas: Metas = Metas.empty
 ) extends ParsedMove {
 
-  def usi: Usi = Usi.Drop(role, pos)
+  def usi: Usi = Usi.Drop(role, dest)
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def positions = List(pos)
 }
 
 case class InitialPosition(

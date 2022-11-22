@@ -1,8 +1,6 @@
 package shogi
 package format.usi
 
-import cats.data.Validated
-import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
 sealed trait Usi {
@@ -10,8 +8,7 @@ sealed trait Usi {
   def usi: String
   def uci: String // will be removed
 
-  def positions: List[Pos]
-  def toMove(sit: Situation): Validated[String, shogi.Move]
+  def dest: Pos
 }
 
 object Usi {
@@ -30,13 +27,6 @@ object Usi {
 
     def promotionString = if (promotion) "+" else ""
 
-    def positions = List(orig, dest)
-
-    def toMove(sit: Situation): Validated[String, shogi.Move] =
-      Validated.fromOption(sit.board(orig), s"No piece at $orig") map { p =>
-        PieceMove(sit.board, p, orig, dest, promotion)
-      }
-
     override def toString: String = usi
   }
 
@@ -50,17 +40,11 @@ object Usi {
 
   }
 
-  case class Drop(role: Role, pos: Pos) extends Usi {
+  case class Drop(role: Role, dest: Pos) extends Usi {
 
-    def usi = s"${role.forsythUpper}*${pos.usiKey}"
+    def usi = s"${role.forsythUpper}*${dest.usiKey}"
 
-    def uci = s"${role.forsythUpper}*${pos.uciKey}"
-
-    def positions = List(pos)
-
-    def toMove(sit: Situation): Validated[String, shogi.Move] =
-      if (sit.variant.handRoles contains role) valid(PieceDrop(Piece(sit.color, role), pos))
-      else invalid(s"$role can't be dropped in ${sit.variant} shogi")
+    def uci = s"${role.forsythUpper}*${dest.uciKey}"
 
     override def toString: String = usi
   }
@@ -70,8 +54,8 @@ object Usi {
     def apply(drop: String): Option[Drop] =
       for {
         role <- Role.allByForsythUpper.get(drop.takeWhile(_ != '*'))
-        pos  <- Pos.fromKey(drop takeRight 2)
-      } yield Drop(role, pos)
+        dest <- Pos.fromKey(drop takeRight 2)
+      } yield Drop(role, dest)
 
   }
 

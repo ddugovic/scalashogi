@@ -21,13 +21,13 @@ object Reader {
   }
 
   def fromParsedNotation(parsed: ParsedNotation, op: ParsedMoves => ParsedMoves): Result =
-    makeReplayFromUsis(makeGame(parsed.tags), op(parsed.parsedMoves))
+    fromParsedMoves(op(parsed.parsedMoves), parsed.tags)
 
   def fromParsedMoves(
       parsedMoves: ParsedMoves,
       tags: Tags
   ): Result =
-    makeReplayFromUsis(makeGame(tags), parsedMoves)
+    makeReplayFromUsis(makeGame(tags), parsedMoves.toVector.map(_.usi))
 
   def fromUsi(
       usis: Usis,
@@ -96,6 +96,4 @@ object Reader {
           )
       case (r: Result.Incomplete, _) => r
     }
-
-  implicit def toUsis(parsedMoves: ParsedMoves): Usis = parsedMoves.toVector.map(_.usi)
 }

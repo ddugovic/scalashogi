@@ -4,7 +4,6 @@ import cats.data.Validated
 import cats.implicits._
 
 import shogi.format.forsyth.Sfen
-import shogi.format.ParsedMove
 import shogi.format.psn.PsnMove
 import shogi.format.usi.Usi
 import shogi.variant.Variant
@@ -62,8 +61,6 @@ case class Situation(
       } else Validated.invalid(s"$color cannot drop $role in this $variant situation")
     }
   }
-
-  def apply(parsedMove: ParsedMove): Validated[String, Situation] = apply(parsedMove.usi)
 
   // Moves
 

@@ -7,7 +7,7 @@ class DividerPerfTest extends ShogiTest {
   val nb         = 100
   val iterations = 10
 
-  val usis: Usis = shogi.format.usi.Usi.read(format.usi.Fixtures.fromProd2).get
+  val usis: Usis = shogi.format.usi.Usi.readList(format.usi.Fixtures.fromProd2).get
   val gameReplay = Replay.situations(usis, None, variant.Standard).toOption.get
   def runOne     = Divider(gameReplay.toList)
   def run(): Unit = { for (_ <- 1 to nb) runOne }

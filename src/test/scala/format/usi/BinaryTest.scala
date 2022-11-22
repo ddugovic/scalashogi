@@ -14,13 +14,13 @@ class BinaryTest extends ShogiTest {
   val situation = makeSituation
 
   def compareStrAndBin(usisStr: String) = {
-    val usis: Usis = Usi.read(usisStr).get
+    val usis: Usis = Usi.readList(usisStr).get
     val bin        = Binary.encodeMoves(usis, Standard).toVector
     Binary.decodeMoves(bin, Standard, 600).map(_.usi).mkString(" ") must_== usisStr
   }
 
   def compareStrAndBin(usisStr: String, situation: Situation) = {
-    val usis: Usis = Usi.read(usisStr).get
+    val usis: Usis = Usi.readList(usisStr).get
     val bin        = Binary.encodeMoves(usis, situation.variant).toVector
     Binary.decodeMove(bin, situation.variant).map(_.usi).mkString(" ") must_== usisStr
   }
@@ -69,7 +69,7 @@ class BinaryTest extends ShogiTest {
     "write many moves" in {
       "all games" in {
         forall(format.usi.Fixtures.prod500standard) { usisStr =>
-          val usis: Usis = Usi.read(usisStr).get
+          val usis: Usis = Usi.readList(usisStr).get
           val bin        = Binary.encodeMoves(usis, Standard).toList
           bin.size must be_<=(usisStr.size)
         }
@@ -142,7 +142,7 @@ object BinaryTestUtils {
     }.toBinaryString.toInt
 
   def encodeMove(m: String, variant: Variant): String = {
-    val usis: Usis = Usi.read(m).get
+    val usis: Usis = Usi.readList(m).get
     Binary.encodeMoves(usis, variant) map showByte mkString ","
   }
 

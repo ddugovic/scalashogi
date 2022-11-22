@@ -40,7 +40,7 @@ object Initial {
 
 case class NotationMove(
     moveNumber: Int,
-    move: shogi.Move,
+    usiWithRole: shogi.Move,
     comments: List[String] = Nil,
     glyphs: Glyphs = Glyphs.empty,
     result: Option[String] = None,
@@ -49,4 +49,7 @@ case class NotationMove(
     secondsSpent: Option[Int] = None,
     // total time spent playing so far
     secondsTotal: Option[Int] = None
-)
+) {
+
+  def move: shogi.Move = usiWithRole
+}

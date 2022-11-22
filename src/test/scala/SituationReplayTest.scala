@@ -3,7 +3,7 @@ package shogi
 import format.usi.Usi
 
 class SituationReplayTest extends ShogiTest {
-  val usis: Seq[Usis] = format.usi.Fixtures.prod500standard.map(Usi.read(_).get)
+  val usis: Seq[Usis] = format.usi.Fixtures.prod500standard.map(Usi.readList(_).get)
 
   "all 500 fixtures" should {
     "have no errors and correct size" in {

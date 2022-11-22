@@ -67,6 +67,6 @@ object Usi {
   def readList(moves: List[String]): Option[Usis] =
     moves.toVector.map(apply).sequence
 
-  def read(moves: String): Option[Usis] =
+  def readList(moves: String): Option[Usis] =
     readList(moves.split(' ').toList)
 }

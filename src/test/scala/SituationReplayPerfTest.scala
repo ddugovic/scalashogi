@@ -10,7 +10,7 @@ class SituationReplayPerfTest extends ShogiTest {
   val nb         = 100
   val iterations = 10
 
-  val usis               = format.usi.Fixtures.prod500standard.take(nb).map(Usi.readList(_).get)
+  val usis               = format.usi.Fixtures.prod500standard.take(nb).map(Usi.readMoves(_).get)
   def runOne(usis: Usis) = Replay.situations(usis, None, Standard)
   def run() = { usis foreach runOne }
 

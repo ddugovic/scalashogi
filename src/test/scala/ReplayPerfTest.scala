@@ -7,7 +7,7 @@ class ReplayPerfTest extends ShogiTest {
   // args(skipAll = true)
 
   val nb               = 100
-  val usis: List[Usis] = format.usi.Fixtures.prod500standard.map(Usi.readList(_).get)
+  val usis: List[Usis] = format.usi.Fixtures.prod500standard.map(Usi.readMoves(_).get)
   val iterations       = 10
 
   def runOne(usis: Usis) =

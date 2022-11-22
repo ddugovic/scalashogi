@@ -2,7 +2,7 @@ package shogi
 
 class DividerTest extends ShogiTest {
 
-  val usis: Usis = shogi.format.usi.Usi.readList(format.usi.Fixtures.fromProd2).get
+  val usis: Usis = shogi.format.usi.Usi.readMoves(format.usi.Fixtures.fromProd2).get
 
   // more tests wanted
   "the divider finds middlegame and endgame" should {

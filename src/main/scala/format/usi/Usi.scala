@@ -64,9 +64,14 @@ object Usi {
       Usi.Drop(usiStr)
     else Usi.Move(usiStr)
 
-  def readList(moves: List[String]): Option[Usis] =
+  def readMoves(moves: List[String]): Option[Usis] =
     moves.toVector.map(apply).sequence
 
-  def readList(moves: String): Option[Usis] =
-    readList(moves.split(' ').toList)
+  def readMoves(moves: String): Option[Usis] =
+    readMoves(moves.split(' ').toList)
+
+  def readList(moves: String): Option[List[Usi]] =
+    readMoves(moves).map(_.toList)
+
+  implicit def toString(usi: Usi): String = usi.toString
 }

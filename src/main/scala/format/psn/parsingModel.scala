@@ -8,29 +8,29 @@ import cats.syntax.option._
 case class ParsedPsn(
     initialPosition: InitialPosition,
     tags: Tags,
-    sans: Variation
+    moves: PsnMoves
 )
 
-case class Variation(value: List[San]) extends AnyVal
+case class PsnMoves(value: List[PsnMove]) extends AnyVal
 
-object Variation {
-  val empty = Variation(Nil)
+object PsnMoves {
+  val empty = PsnMoves(Nil)
 }
 
 // Standard Algebraic Notation
-sealed trait San {
+sealed trait PsnMove {
 
   def apply(situation: Situation): Validated[String, shogi.Move]
 
   def metas: Metas
 
-  def withMetas(m: Metas): San
+  def withMetas(m: Metas): PsnMove
 
-  def withComments(s: List[String]): San = withMetas(metas withComments s)
+  def withComments(s: List[String]): PsnMove = withMetas(metas withComments s)
 
-  def withVariations(s: List[Variation]): San = withMetas(metas withVariations s)
+  def withVariations(s: List[PsnMoves]): PsnMove = withMetas(metas withVariations s)
 
-  def mergeGlyphs(glyphs: Glyphs): San =
+  def mergeGlyphs(glyphs: Glyphs): PsnMove =
     withMetas(
       metas.withGlyphs(metas.glyphs merge glyphs)
     )
@@ -44,7 +44,7 @@ case class Move(
     rank: Option[Int] = None,
     promotion: Boolean = false,
     metas: Metas = Metas.empty
-) extends San {
+) extends PsnMove {
 
   def apply(situation: Situation) = move(situation)
 
@@ -78,7 +78,7 @@ case class Drop(
     role: Role,
     dest: Pos,
     metas: Metas = Metas.empty
-) extends San {
+) extends PsnMove {
 
   def apply(situation: Situation) = drop(situation)
 
@@ -99,14 +99,14 @@ case class InitialPosition(
 case class Metas(
     comments: List[String],
     glyphs: Glyphs,
-    variations: List[Variation]
+    variations: List[PsnMoves]
 ) {
 
   def withGlyphs(g: Glyphs) = copy(glyphs = g)
 
   def withComments(c: List[String]) = copy(comments = c)
 
-  def withVariations(v: List[Variation]) = copy(variations = v)
+  def withVariations(v: List[PsnMoves]) = copy(variations = v)
 }
 
 object Metas {

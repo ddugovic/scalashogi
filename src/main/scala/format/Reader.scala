@@ -63,19 +63,19 @@ object Reader {
 
   def fullWithVariation(
       pgn: String,
-      op: Variation => Variation,
+      op: PsnMoves => PsnMoves,
       tags: Tags = Tags.empty
   ): Validated[String, Result] =
     Parser.full(cleanUserInput(pgn)) map { parsed =>
-      makeReplay(makeGame(parsed.tags ++ tags), op(parsed.sans))
+      makeReplay(makeGame(parsed.tags ++ tags), op(parsed.moves))
     }
 
-  def fullWithVariation(parsed: ParsedPsn, op: Variation => Variation): Result =
-    makeReplay(makeGame(parsed.tags), op(parsed.sans))
+  def fullWithVariation(parsed: ParsedPsn, op: PsnMoves => PsnMoves): Result =
+    makeReplay(makeGame(parsed.tags), op(parsed.moves))
 
   def movesWithVariation(
       moveStrs: Iterable[String],
-      op: Variation => Variation,
+      op: PsnMoves => PsnMoves,
       tags: Tags
   ): Validated[String, Result] =
     Parser.moves(moveStrs) map { moves =>
@@ -85,10 +85,10 @@ object Reader {
   // remove invisible byte order mark
   def cleanUserInput(str: String) = str.replace(s"\ufeff", "")
 
-  private def makeReplay(game: Game, sans: Variation): Result =
-    sans.value.foldLeft[Result](Result.Complete(Replay(game))) {
-      case (Result.Complete(replay), san) =>
-        san(replay.state.situation).fold(
+  private def makeReplay(game: Game, moves: PsnMoves): Result =
+    moves.value.foldLeft[Result](Result.Complete(Replay(game))) {
+      case (Result.Complete(replay), move) =>
+        move(replay.state.situation).fold(
           err => Result.Incomplete(replay, err),
           move => Result.Complete(replay(move))
         )

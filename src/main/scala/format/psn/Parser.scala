@@ -25,28 +25,28 @@ object Parser {
         invalid(showExpectations("Cannot parse psn", psn, err))
     }
 
-  def moves(str: String): Validated[String, Variation] =
+  def moves(str: String): Validated[String, PsnMoves] =
     MovesParser.moves(str)
 
-  def moves(strMoves: Iterable[String]): Validated[String, Variation] =
+  def moves(strMoves: Iterable[String]): Validated[String, PsnMoves] =
     strMoves.toList
       .traverse(MovesParser.move)
-      .map(Variation(_))
+      .map(PsnMoves(_))
 
-  def move(str: String): Validated[String, San] = MovesParser.move(str)
+  def move(str: String): Validated[String, PsnMove] = MovesParser.move(str)
 
   private object MovesParser {
 
     private def cleanComments(comments: List[String]) = comments.map(_.trim).filter(_.nonEmpty)
 
-    def moves(str: String): Validated[String, Variation] =
-      strMove.rep.map(xs => Variation(xs.toList)).parse(str) match {
+    def moves(str: String): Validated[String, PsnMoves] =
+      strMove.rep.map(xs => PsnMoves(xs.toList)).parse(str) match {
         case Right((_, str)) =>
           valid(str)
         case Left(err) => invalid(showExpectations("Cannot parse moves", str, err))
       }
 
-    def move(str: String): Validated[String, San] =
+    def move(str: String): Validated[String, PsnMove] =
       strMove.parse(str) match {
         case Right((_, str)) =>
           valid(str)
@@ -119,11 +119,11 @@ object Parser {
         .?
         .flatMap(o => o.fold(P.unit)(_ => P.failWith("Lishogi does not support null moves").void))
 
-    val strMove: P[San] = P
-      .recursive[San] { recuse =>
-        val variation: P[Variation] =
+    val strMove: P[PsnMove] = P
+      .recursive[PsnMove] { recuse =>
+        val variation: P[PsnMoves] =
           (((P.char('(') <* escape) *> recuse.rep0 <* (P.char(')') ~ escape)) <* escape)
-            .map(Variation(_))
+            .map(PsnMoves(_))
 
         ((number.backtrack | (commentary <* escape)).rep0 ~ forbidNullMove).with1 *>
           (((MoveParser.moveWithGlyphs ~ nagGlyphs ~ commentary.rep0 ~ nagGlyphs ~ variation.rep0) <* moveExtras.rep0) <* escape).backtrack
@@ -132,7 +132,7 @@ object Parser {
             }
       }
 
-    val strMoves: P0[(InitialPosition, List[San], Option[String])] =
+    val strMoves: P0[(InitialPosition, List[PsnMove], Option[String])] =
       ((commentary.rep0 ~ strMove.rep0) ~ (result <* escape).? <* commentary.rep0).map {
         case ((coms, sans), res) => (InitialPosition(cleanComments(coms)), sans.toList, res)
       }
@@ -181,12 +181,12 @@ object Parser {
         Move(dest = de, role = ro, capture = ca, file = fi, rank = ra, promotion = pr)
     }
 
-    val standard: P[San] = P.oneOf(
+    val standard: P[PsnMove] = P.oneOf(
       (disambiguated :: ambiguous :: drop :: Nil).map(_.backtrack)
     )
 
-    val move: P[San] = standard.withContext("Invalid shogi move")
-    val moveWithGlyphs: P[San] = (move ~ glyphs <* escape)
+    val move: P[PsnMove] = standard.withContext("Invalid shogi move")
+    val moveWithGlyphs: P[PsnMove] = (move ~ glyphs <* escape)
       .map { case (std, gly) =>
         std mergeGlyphs gly
       }
@@ -220,11 +220,11 @@ object Parser {
       case (optionalTags, optionalMoves) => {
         val preTags = Tags(optionalTags.map(_.toList).getOrElse(List()))
         optionalMoves match {
-          case None => ParsedPsn(InitialPosition(List()), preTags, Variation(List()))
+          case None => ParsedPsn(InitialPosition(List()), preTags, PsnMoves(List()))
           case Some((init, sans, resultOption)) => {
             val tags =
               resultOption.filterNot(_ => preTags.exists(_.Result)).foldLeft(preTags)(_ + Tag(_.Result, _))
-            ParsedPsn(init, tags, Variation(sans))
+            ParsedPsn(init, tags, PsnMoves(sans))
           }
         }
       }

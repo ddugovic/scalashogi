@@ -5,6 +5,7 @@ import cats.implicits._
 
 import shogi.format.forsyth.Sfen
 import shogi.format.ParsedMove
+import shogi.format.psn.PsnMove
 import shogi.format.usi.Usi
 import shogi.variant.Variant
 
@@ -33,6 +34,33 @@ case class Situation(
         else Validated.invalid(s"$color cannot drop $role in this $variant situation")
     }
     move map apply
+  }
+
+  def validate(psn: PsnMove): Validated[String, Move] = psn match {
+    case shogi.format.psn.Move(dest, role, _, file, rank, promotion, _) =>
+      board.pieces.foldLeft(none[PieceMove]) {
+        case (None, (pos, piece))
+            if piece.color == color && piece.role == role &&
+              file.fold(true)(pos.file.index + 1 == _) &&
+              rank.fold(true)(pos.rank.index + 1 == _) &&
+              piece.eyes(pos, dest) =>
+          moveActorAt(pos) map { a =>
+            (if (promotion) a.promotionMoves(this) else a.unpromotionMoves(this)).filter {
+              _.dest == dest
+            }.head
+          }
+        case (m, _) => m
+      } match {
+        case None       => Validated invalid s"Move $role $file$rank not found:\n$this"
+        case Some(move) => Validated valid move
+      }
+    case shogi.format.psn.Drop(role, dest, _) => {
+      if (variant.handRoles contains role) {
+        val piece = Piece(color, role)
+        if (dropDestsOf(piece) contains dest) Validated.valid(PieceDrop(piece, dest))
+        else Validated.invalid(s"No $role drop at $dest found:\n$this")
+      } else Validated.invalid(s"$color cannot drop $role in this $variant situation")
+    }
   }
 
   def apply(parsedMove: ParsedMove): Validated[String, Situation] = apply(parsedMove.usi)

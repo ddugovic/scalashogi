@@ -2,9 +2,6 @@ package shogi
 package format
 package psn
 
-import cats.data.Validated
-import cats.syntax.option._
-
 case class ParsedPsn(
     initialPosition: InitialPosition,
     tags: Tags,
@@ -14,13 +11,12 @@ case class ParsedPsn(
 case class PsnMoves(value: List[PsnMove]) extends AnyVal
 
 object PsnMoves {
+
   val empty = PsnMoves(Nil)
 }
 
 // Standard Algebraic Notation
 sealed trait PsnMove {
-
-  def apply(situation: Situation): Validated[String, shogi.Move]
 
   def metas: Metas
 
@@ -46,32 +42,7 @@ case class Move(
     metas: Metas = Metas.empty
 ) extends PsnMove {
 
-  def apply(situation: Situation) = move(situation)
-
   def withMetas(m: Metas) = copy(metas = m)
-
-  def move(situation: Situation): Validated[String, PieceMove] =
-    situation.board.pieces.foldLeft(none[PieceMove]) {
-      case (None, (pos, piece))
-          if piece.color == situation.color && piece.role == role && compare(
-            file,
-            pos.file.index + 1
-          ) && compare(
-            rank,
-            pos.rank.index + 1
-          ) && piece.eyes(pos, dest) =>
-        situation moveActorAt pos map { a =>
-          (if (promotion) a.promotionMoves(situation) else a.unpromotionMoves(situation)).filter {
-            _.dest == dest
-          }.head
-        }
-      case (m, _) => m
-    } match {
-      case None       => Validated invalid s"No move found: $this\n$situation"
-      case Some(move) => Validated valid move
-    }
-
-  private def compare[A](a: Option[A], b: A) = a.fold(true)(b ==)
 }
 
 case class Drop(
@@ -80,16 +51,7 @@ case class Drop(
     metas: Metas = Metas.empty
 ) extends PsnMove {
 
-  def apply(situation: Situation) = drop(situation)
-
   def withMetas(m: Metas) = copy(metas = m)
-
-  def drop(situation: Situation): Validated[String, PieceDrop] = {
-    val piece = Piece(situation.color, role)
-    if (situation dropDestsOf piece contains dest)
-      Validated valid PieceDrop(piece, dest)
-    else Validated invalid s"No $role drop at $dest found: $this\n$situation"
-  }
 }
 
 case class InitialPosition(
@@ -110,6 +72,7 @@ case class Metas(
 }
 
 object Metas {
+
   val empty = Metas(Nil, Glyphs.empty, Nil)
 }
 

@@ -85,13 +85,15 @@ object Reader {
   // remove invisible byte order mark
   def cleanUserInput(str: String) = str.replace(s"\ufeff", "")
 
-  private def makeReplay(game: Game, moves: PsnMoves): Result =
-    moves.value.foldLeft[Result](Result.Complete(Replay(game))) {
-      case (Result.Complete(replay), move) =>
-        move(replay.state.situation).fold(
-          err => Result.Incomplete(replay, err),
-          move => Result.Complete(replay(move))
-        )
+  private def makeReplay(game: Game, psns: PsnMoves): Result =
+    psns.value.foldLeft[Result](Result.Complete(Replay(game))) {
+      case (Result.Complete(replay), psn) =>
+        replay.state.situation
+          .validate(psn)
+          .fold(
+            err => Result.Incomplete(replay, err),
+            move => Result.Complete(replay(move))
+          )
       case (r: Result.Incomplete, _) => r
     }
 

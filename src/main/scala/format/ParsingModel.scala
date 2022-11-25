@@ -29,7 +29,12 @@ sealed trait ParsedMove {
     withMetas(
       metas.withGlyphs(metas.glyphs merge glyphs)
     )
+}
 
+// TODO: Remove compatibility facade
+object ParsedMove {
+
+  implicit def toUsi(parsedMove: ParsedMove): Usi = parsedMove.usi
 }
 
 case class KifMove(
@@ -43,7 +48,6 @@ case class KifMove(
   def usi: Usi = Usi.Move(orig, dest, promotion)
 
   def withMetas(m: Metas) = copy(metas = m)
-
 }
 
 case class CsaMove(
@@ -57,7 +61,6 @@ case class CsaMove(
   def usi: Usi = Usi.Move(orig, dest, promotion)
 
   def withMetas(m: Metas) = copy(metas = m)
-
 }
 
 // All notations can share drop
@@ -70,7 +73,6 @@ case class ParsedDrop(
   def usi: Usi = Usi.Drop(role, dest)
 
   def withMetas(m: Metas) = copy(metas = m)
-
 }
 
 case class InitialPosition(
@@ -97,6 +99,7 @@ case class Metas(
 }
 
 object Metas {
+
   val empty = Metas(Nil, Glyphs.empty, Nil, None, None)
 }
 

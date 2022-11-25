@@ -34,6 +34,9 @@ case class Game(
   def apply(usi: shogi.format.usi.Usi): Validated[String, Game] =
     situation(usi).map(applySituation(_))
 
+  // TODO: Remove compatibility facade
+  def usis = toUsis(moves)
+
   def board = situation.board
 
   def hands = situation.hands

@@ -70,8 +70,9 @@ object Usi {
   def readMoves(moves: String): Option[Usis] =
     readMoves(moves.split(' ').toList)
 
-  def readList(moves: String): Option[List[Usi]] =
+  def readList(moves: List[String]): Option[List[Usi]] =
     readMoves(moves).map(_.toList)
 
-  implicit def toString(usi: Usi): String = usi.toString
+  def readList(moves: String): Option[List[Usi]] =
+    readMoves(moves).map(_.toList)
 }

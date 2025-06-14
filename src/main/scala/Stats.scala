@@ -13,7 +13,7 @@ sealed trait Stats {
       s record n.toFloat(v)
     }
 
-  def stdDev = variance.map { math.sqrt(_).toFloat }
+  def stdDev = variance.map { v => math.sqrt(v.toDouble).toFloat }
 
   def total = samples * mean
 }
@@ -21,9 +21,9 @@ sealed trait Stats {
 final protected case class StatHolder(
     samples: Int,
     mean: Float,
-    sn: Float
+    sn: Float,
 ) extends Stats {
-  def variance = (samples > 1) option sn / (samples - 1)
+  def variance = Option.when(samples > 1)(sn / (samples - 1))
 
   def record(value: Float) = {
     val newSamples = samples + 1
@@ -34,7 +34,7 @@ final protected case class StatHolder(
     StatHolder(
       samples = newSamples,
       mean = newMean,
-      sn = newSN
+      sn = newSN,
     )
   }
 
@@ -53,7 +53,7 @@ final protected case class StatHolder(
         StatHolder(
           samples = samples + oSamples,
           mean = combMean,
-          sn = sn + oSN + meanDiff * meanDiff * samples * oSamples * invTotal
+          sn = sn + oSN + meanDiff * meanDiff * samples * oSamples * invTotal,
         )
       }
     }
@@ -68,7 +68,7 @@ protected object EmptyStats extends Stats {
     StatHolder(
       samples = 1,
       mean = value,
-      sn = 0f
+      sn = 0f,
     )
 
   def +(o: Stats) = o

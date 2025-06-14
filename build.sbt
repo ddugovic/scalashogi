@@ -1,25 +1,15 @@
 name := "scalashogi"
 
-version := "12.1.1"
+version := "12.2.0"
 
-ThisBuild / scalaVersion := "2.13.14"
-ThisBuild / githubWorkflowPublishTargetBranches := Seq() // Don't publish anywhere
-ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("17"))
-ThisBuild / githubWorkflowBuild ++= Seq(
-  WorkflowStep.Sbt(List("scalafmtCheckAll"), name = Some("Check Formatting"))
-)
+ThisBuild / scalaVersion := "2.13.16"
 
 libraryDependencies ++= List(
   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
-  "org.specs2"             %% "specs2-core"              % "4.20.8" % Test,
-  "org.specs2"             %% "specs2-cats"              % "4.20.8" % Test,
-  "com.github.ornicar"     %% "scalalib"                 % "7.0.2",
-  "joda-time"              % "joda-time"                 % "2.12.7",
-  "org.typelevel"          %% "cats-core"                % "2.12.0"
-)
-
-resolvers ++= Seq(
-  "lila-maven" at "https://raw.githubusercontent.com/lichess-org/lila-maven/master"
+  "org.typelevel"          %% "cats-core"                % "2.12.0",
+  "joda-time"               % "joda-time"                % "2.13.0",
+  "org.specs2"             %% "specs2-core"              % "4.20.9" % Test,
+  "org.specs2"             %% "specs2-cats"              % "4.20.9" % Test,
 )
 
 scalacOptions ++= Seq(
@@ -31,11 +21,9 @@ scalacOptions ++= Seq(
   "-language:implicitConversions",
   "-language:postfixOps",
   "-Ymacro-annotations",
-  // Warnings as errors!
-  "-Xfatal-warnings",
-  // Linting options
   "-unchecked",
   "-Xcheckinit",
+  // Linting options
   "-Xlint:adapted-args",
   "-Xlint:constant",
   "-Xlint:delayedinit-select",
@@ -52,7 +40,7 @@ scalacOptions ++= Seq(
   "-Xlint:type-parameter-shadow",
   "-Wdead-code",
   "-Wextra-implicit",
-  // "-Wnumeric-widen",
+  "-Wnumeric-widen",
   "-Wunused:imports",
   "-Wunused:locals",
   "-Wunused:patvars",
@@ -60,6 +48,5 @@ scalacOptions ++= Seq(
   "-Wunused:implicits",
   "-Wunused:params",
   "-Wvalue-discard",
-  "-Xmaxerrs",
-  "12"
+  "-Werror",
 )
